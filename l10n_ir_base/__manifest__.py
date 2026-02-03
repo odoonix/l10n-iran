@@ -55,7 +55,7 @@
         "python": [
             "jdatetime",
             "persiantools",
-            "rlPyCairo"
+            # "rlPyCairo"
         ]
     },
 }
