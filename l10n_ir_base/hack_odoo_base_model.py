@@ -210,5 +210,5 @@ def _read_group_format_result(self, data, annotated_groupbys, groupby, domain):
 #
 # Patch the base model
 #
-BaseModel._read_group_format_result = _read_group_format_result
-BaseModel._read_group_process_groupby = _read_group_process_groupby
+# BaseModel._read_group_format_result = _read_group_format_result
+# BaseModel._read_group_process_groupby = _read_group_process_groupby

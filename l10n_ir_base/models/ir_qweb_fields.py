@@ -117,9 +117,9 @@ class PhoneConverter(models.AbstractModel):
         lang = self.user_lang()
         if lang.code == 'fa_IR':
             value = digits.en_to_fa(value)
-            patt = '<pre style="display:inline;direction:ltr; padding: 0px; margin: 0px;">{}</pre>'
+            patt = '<span style="direction:ltr;text-align:left;">{}</span>'
         else:
-            patt = '<pre style="display:inline;padding: 0px; margin: 0px;">{}</pre>'
+            patt = '<span>{}</span>'
         return Markup(patt).format(value)
 
 
