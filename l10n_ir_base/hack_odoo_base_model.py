@@ -8,7 +8,6 @@ import pytz
 from persiantools import digits
 
 from odoo import api
-from odoo.models import BaseModel
 from odoo.osv import expression
 from odoo.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
@@ -39,14 +38,12 @@ def _read_group_process_groupby(self, gb, query):
     split = gb.split(":")
     field = self._fields.get(split[0])
     if not field:
-        raise ValueError("Invalid field %r on model %r" %
-                         (split[0], self._name))
+        raise ValueError("Invalid field %r on model %r" % (split[0], self._name))
     field_type = field.type
     gb_function = split[1] if len(split) == 2 else None
     temporal = field_type in ("date", "datetime")
     tz_convert = (
-        field_type == "datetime" and self._context.get(
-            "tz") in pytz.all_timezones
+        field_type == "datetime" and self._context.get("tz") in pytz.all_timezones
     )
     qualified_field = self._inherits_join_calc(self._table, split[0], query)
     if temporal:
@@ -179,8 +176,7 @@ def _read_group_format_result(self, data, annotated_groupbys, groupby, domain):
                         label = babel.dates.format_date(
                             value, format=gb["display_format"], locale=locale
                         )
-                data[gb["groupby"]] = (
-                    "%s/%s" % (range_start, range_end), label)
+                data[gb["groupby"]] = ("%s/%s" % (range_start, range_end), label)
                 data.setdefault("__range", {})[gb["groupby"]] = {
                     "from": range_start,
                     "to": range_end,
@@ -202,7 +198,7 @@ def _read_group_format_result(self, data, annotated_groupbys, groupby, domain):
 
     data["__domain"] = expression.AND(sections)
     if len(groupby) - len(annotated_groupbys) >= 1:
-        data["__context"] = {"group_by": groupby[len(annotated_groupbys):]}
+        data["__context"] = {"group_by": groupby[len(annotated_groupbys) :]}
     del data["id"]
     return data
 

@@ -6,13 +6,13 @@ export class Container {
         this.gDate = null;
         /**
          *
-         * @type {number}
+         * @type {Number}
          */
         this.modifiedjulianday = 0;
 
         /**
          *
-         * @type {number}
+         * @type {Number}
          */
         this.julianday = 0;
 

@@ -203,7 +203,7 @@ export class DatePicker extends Component {
     }
 
     /**
-     * @desc toggle datepicker container element
+     * @description toggle datepicker container element
      */
     toggle() {
         this.state.hide = !this.state.hide;
@@ -218,13 +218,22 @@ export class DatePicker extends Component {
         let output = "??";
         switch (this.state.viewMode) {
             case "day":
-                output = this.titleFormatter(this.date.unixDate, this.props.dayPicker.titleFormat);
+                output = this.titleFormatter(
+                    this.date.unixDate,
+                    this.props.dayPicker.titleFormat
+                );
                 break;
             case "month":
-                output = this.titleFormatter(this.date.unixDate, this.props.monthPicker.titleFormat);
+                output = this.titleFormatter(
+                    this.date.unixDate,
+                    this.props.monthPicker.titleFormat
+                );
                 break;
             case "year":
-                output = this.titleFormatter(this.date.unixDate, this.props.yearPicker.titleFormat);
+                output = this.titleFormatter(
+                    this.date.unixDate,
+                    this.props.yearPicker.titleFormat
+                );
                 break;
         }
         return output;
@@ -250,7 +259,10 @@ export class DatePicker extends Component {
 
     get currentCalendarType() {
         return toCalendartype(
-            this.state.calendarType || this.props.calendarType || Settings.defaultOutputCalendar || "persian"
+            this.state.calendarType ||
+                this.props.calendarType ||
+                Settings.defaultOutputCalendar ||
+                "persian"
         );
     }
 
@@ -271,7 +283,7 @@ export class DatePicker extends Component {
      *                 Filter date                    *
      ******************************************************/
     /**
-     * @desc check year is accessible
+     * @description check year is accessible
      * @param {Number} year - year number
      * @returns {Boolean}
      */
@@ -281,7 +293,7 @@ export class DatePicker extends Component {
     }
 
     /**
-     * @desc check month is accessible
+     * @description check month is accessible
      * @param {Number} month - month number
      * @returns {Boolean}
      */
@@ -291,7 +303,7 @@ export class DatePicker extends Component {
     }
 
     /**
-     * @desc check day is accessible
+     * @description check day is accessible
      * @param {Number} unixtimespan - month number
      * @returns {Boolean}
      */
@@ -299,10 +311,14 @@ export class DatePicker extends Component {
         if (this.props.filetredDate) {
             return true;
         }
-        const minDate = this.persianDatePars(this.props.minDate | Number.MIN_SAFE_INTEGER)
+        const minDate = this.persianDatePars(
+            this.props.minDate | Number.MIN_SAFE_INTEGER
+        )
             .startOf("day")
             .valueOf();
-        const maxDate = this.persianDatePars(this.props.maxDate | Number.MAX_SAFE_INTEGER)
+        const maxDate = this.persianDatePars(
+            this.props.maxDate | Number.MAX_SAFE_INTEGER
+        )
             .endOf("day")
             .valueOf();
         return unixtimespan > minDate || unixtimespan > maxDate;
@@ -349,9 +365,10 @@ export class DatePicker extends Component {
         }
         /**
          * @description Generate years list based on viewState year
-         * @return ['1380',n+12,'1392']
+         * @returns ['1380',n+12,'1392']
          */
-        const center = parseInt(this.date.year / YEARS_VIEW_COUNT, 10) * YEARS_VIEW_COUNT;
+        const center =
+            parseInt(this.date.year / YEARS_VIEW_COUNT, 10) * YEARS_VIEW_COUNT;
         const objectDate = this.persianDatePars();
         for (let i = 0; i < YEARS_VIEW_COUNT; i++) {
             const year = center + i;
@@ -381,7 +398,10 @@ export class DatePicker extends Component {
         }
 
         const that = this;
-        for (const [index, month] of that.persianDatePars().rangeName().months.entries()) {
+        for (const [index, month] of that
+            .persianDatePars()
+            .rangeName()
+            .months.entries()) {
             template.list.push({
                 title: month,
                 enabled: this.checkMonthAccess(index),
@@ -421,9 +441,14 @@ export class DatePicker extends Component {
         const viewYear = this.date.year;
 
         // This is today identifier
-        const dateObject = this.persianDatePars(this.date.unixDate).hour(12).minute(0).second(0).millisecond(0);
+        const dateObject = this.persianDatePars(this.date.unixDate)
+            .hour(12)
+            .minute(0)
+            .second(0)
+            .millisecond(0);
 
-        const firstWeekDayOfMonth = dateObject.getFirstWeekDayOfMonth(viewYear, viewMonth) - 1;
+        const firstWeekDayOfMonth =
+            dateObject.getFirstWeekDayOfMonth(viewYear, viewMonth) - 1;
         const daysCount = dateObject.daysInMonth(viewYear, viewMonth);
 
         const calendarType = this.currentCalendarType;
@@ -437,7 +462,9 @@ export class DatePicker extends Component {
         let currentUnixTime = startUnixTime - firstWeekDayOfMonth * UNIXTIME_DAY_LENGTH;
         for (let week = 0; week < WEEK_COUNT; week++) {
             for (let day = 0; day < 7; day++) {
-                const calcedDate = new PersianDate(currentUnixTime).toCalendar(calendarType).toLocale(calendarLocal);
+                const calcedDate = new PersianDate(currentUnixTime)
+                    .toCalendar(calendarType)
+                    .toLocale(calendarLocal);
                 template.list[week][day] = {
                     title: calcedDate.format("dd"),
                     index: calcedDate.date(),
@@ -447,7 +474,9 @@ export class DatePicker extends Component {
                         .format("dd"),
                     // Day identifier
                     dataUnix: currentUnixTime,
-                    otherMonth: currentUnixTime < startUnixTime || currentUnixTime > endUnixTime,
+                    otherMonth:
+                        currentUnixTime < startUnixTime ||
+                        currentUnixTime > endUnixTime,
                     // TODO: make configurable
                     enabled: this.checkDayAccess(currentUnixTime),
                     selected: currentUnixTime === this.date.selectedDay,
@@ -477,7 +506,9 @@ export class DatePicker extends Component {
 
     get formattedValue() {
         const value = DateTime.fromMillis(this.date.unixDate);
-        return this.isDateTime ? formatDateTime(value, {format: localization.dateTimeFormat}) : formatDate(value);
+        return this.isDateTime
+            ? formatDateTime(value, {format: localization.dateTimeFormat})
+            : formatDate(value);
     }
 
     /** ****************************************************
@@ -485,36 +516,48 @@ export class DatePicker extends Component {
      ******************************************************/
     yearUp() {
         const step = this.props.yearPicker.step | 1;
-        const newUnixtimestamp = this.persianDatePars(this.date.unixDate).add("year", step).valueOf();
+        const newUnixtimestamp = this.persianDatePars(this.date.unixDate)
+            .add("year", step)
+            .valueOf();
         this.setViewDateTime("unix", newUnixtimestamp);
     }
 
     yearDown() {
         const step = this.props.yearPicker.step | 1;
-        const newUnixtimestamp = this.persianDatePars(this.date.unixDate).subtract("year", step).valueOf();
+        const newUnixtimestamp = this.persianDatePars(this.date.unixDate)
+            .subtract("year", step)
+            .valueOf();
         this.setViewDateTime("unix", newUnixtimestamp);
     }
 
     goToYear(year) {
-        const unixtimestamp = this.persianDatePars(this.date.unixDate).year(year).valueOf();
+        const unixtimestamp = this.persianDatePars(this.date.unixDate)
+            .year(year)
+            .valueOf();
         this.state.viewMode = "month";
         this.setViewDateTime("unix", unixtimestamp);
     }
 
     monthUp() {
         const step = this.props.monthPicker.step | 1;
-        const newUnixtimestamp = this.persianDatePars(this.date.unixDate).add("month", step).valueOf();
+        const newUnixtimestamp = this.persianDatePars(this.date.unixDate)
+            .add("month", step)
+            .valueOf();
         this.setViewDateTime("unix", newUnixtimestamp);
     }
 
     monthDown() {
         const step = this.props.monthPicker.step | 1;
-        const newUnixtimestamp = this.persianDatePars(this.date.unixDate).subtract("month", step).valueOf();
+        const newUnixtimestamp = this.persianDatePars(this.date.unixDate)
+            .subtract("month", step)
+            .valueOf();
         this.setViewDateTime("unix", newUnixtimestamp);
     }
 
     goToMonth(month) {
-        const unixtimestamp = this.persianDatePars(this.date.unixDate).month(month).valueOf();
+        const unixtimestamp = this.persianDatePars(this.date.unixDate)
+            .month(month)
+            .valueOf();
         this.state.viewMode = "day";
         this.setViewDateTime("unix", unixtimestamp);
     }
@@ -524,7 +567,7 @@ export class DatePicker extends Component {
     }
 
     /**
-     * @desc set time up depend to timekey
+     * @description set time up depend to timekey
      * @param {String} timekey - accept hour, minute,second
      * @public
      */
@@ -536,9 +579,13 @@ export class DatePicker extends Component {
             t = null;
         if (timekey === "meridian") {
             if (this.date.meridian === "PM") {
-                t = this.persianDatePars(this.date.unixDate).add("hour", step).valueOf();
+                t = this.persianDatePars(this.date.unixDate)
+                    .add("hour", step)
+                    .valueOf();
             } else {
-                t = this.persianDatePars(this.date.unixDate).subtract("hour", step).valueOf();
+                t = this.persianDatePars(this.date.unixDate)
+                    .subtract("hour", step)
+                    .valueOf();
             }
             this.meridianToggle();
         } else {
@@ -550,7 +597,7 @@ export class DatePicker extends Component {
     }
 
     /**
-     * @desc sets time down depend to timekey
+     * @description sets time down depend to timekey
      *
      * It decrements timekey by a step value. The step value depends on
      * props (by default 1).
@@ -566,14 +613,20 @@ export class DatePicker extends Component {
             t = null;
         if (timekey === "meridian") {
             if (this.date.meridian === "AM") {
-                t = this.persianDatePars(this.date.unixDate).add("hour", step).valueOf();
+                t = this.persianDatePars(this.date.unixDate)
+                    .add("hour", step)
+                    .valueOf();
             } else {
-                t = this.persianDatePars(this.date.unixDate).subtract("hour", step).valueOf();
+                t = this.persianDatePars(this.date.unixDate)
+                    .subtract("hour", step)
+                    .valueOf();
             }
             this.meridianToggle();
         } else {
             step = this.props.timePicker[timekey].step;
-            t = this.persianDatePars(this.date.unixDate).subtract(timekey, step).valueOf();
+            t = this.persianDatePars(this.date.unixDate)
+                .subtract(timekey, step)
+                .valueOf();
         }
         this.setViewDateTime("unix", t);
     }
@@ -634,7 +687,12 @@ export class DatePicker extends Component {
         this.date.second = dateObject.second();
         this.date.unixDate = dateObject.valueOf();
         this.date.meridian = dateObject.format("a");
-        this.date.selectedDay = dateObject.hour(12).minute(0).second(0).millisecond(0).valueOf();
+        this.date.selectedDay = dateObject
+            .hour(12)
+            .minute(0)
+            .second(0)
+            .millisecond(0)
+            .valueOf();
 
         return this.updateViewModel();
     }
@@ -705,7 +763,8 @@ export class DatePicker extends Component {
      * @returns current datepicker
      */
     toggleCalendartype() {
-        this.state.calendarType = this.state.calendarType === "persian" ? "gregorian" : "persian";
+        this.state.calendarType =
+            this.state.calendarType === "persian" ? "gregorian" : "persian";
         this.state.local = this.props.calendar[this.state.calendarType].local;
         this.setViewDateTime("unix", this.date.unixDate);
         return this;

@@ -19,8 +19,10 @@ dates.formatDate = function (value, options = {}) {
         return "";
     }
     const format = options.format || localization.dateFormat;
-    const numberingSystem = options.numberingSystem || Settings.defaultNumberingSystem || "latn";
-    const outputCalendar = options.outputCalendar || Settings.defaultOutputCalendar || "iso8601";
+    const numberingSystem =
+        options.numberingSystem || Settings.defaultNumberingSystem || "latn";
+    const outputCalendar =
+        options.outputCalendar || Settings.defaultOutputCalendar || "iso8601";
     return value.toFormat(format, {numberingSystem, outputCalendar});
 };
 
@@ -29,8 +31,10 @@ dates.formatDateTime = function (value, options = {}) {
         return "";
     }
     const format = options.format || localization.dateTimeFormat;
-    const numberingSystem = options.numberingSystem || Settings.defaultNumberingSystem || "latn";
-    const outputCalendar = options.outputCalendar || Settings.defaultOutputCalendar || "iso8601";
+    const numberingSystem =
+        options.numberingSystem || Settings.defaultNumberingSystem || "latn";
+    const outputCalendar =
+        options.outputCalendar || Settings.defaultOutputCalendar || "iso8601";
     return value.setZone("default").toFormat(format, {numberingSystem, outputCalendar});
 };
 
@@ -44,7 +48,8 @@ dates.parseDateTime = function (value, options = {}) {
         setZone: true,
         zone: "default",
         locale: options.locale,
-        numberingSystem: options.numberingSystem || Settings.defaultNumberingSystem || "latn",
+        numberingSystem:
+            options.numberingSystem || Settings.defaultNumberingSystem || "latn",
     };
 
     // Base case: try parsing with the given format and options

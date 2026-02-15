@@ -1,0 +1,54 @@
+
+{#
+   addon_name: the addon name from manifest
+   authors: authors from manifest
+   badges: badges ???
+   branch: branch ???
+   fragments: list of fragments file which is a fixed list
+   manifest: the addon manifest file
+   org_name: github organization name which is part of github path
+   repo_name: the repository name which is part of github path
+   development_status: development_status???
+   source_digest: source_digest???
+   level3_underline: "~" if fragments_format == ".rst" else "-",
+
+
+
+
+   FRAGMENTS:
+
+   - DESCRIPTION
+   - CONTEXT
+   - INSTALL
+   - CONFIGURE
+   - USAGE
+   - ROADMAP
+   - DEVELOP
+   - CONTRIBUTORS
+   - CREDITS
+   - HISTORY
+
+
+#}
+
+
+
+{%- macro fragment(name, title, sub='=') %}
+{%- if name in fragments %}
+{{- title }}
+{{ sub * title|length }}
+
+{{ fragments[name] }}
+{% endif %}
+{%- endmacro -%}
+
+
+{{ fragment('DESCRIPTION', 'Description') }}
+{{ fragment('CONTEXT', 'Usecase') }}
+{{ fragment('INSTALL', 'Installation') }}
+{{ fragment('CONFIGURE', 'Configuration') }}
+{{ fragment('USAGE', 'Usage') }}
+{{ fragment('CONTRIBUTORS', 'Contributer') }}
+{{ fragment('CREDITS', 'Credits') }}
+{{ fragment('HISTORY', 'History') }}
+{{ fragment('DEVELOP', 'Development') }}

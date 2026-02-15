@@ -6,8 +6,18 @@
             <t t-if="props.timePicker.hour.enabled">
                 <div class="hour time-segment" data-time-key="hour">
                     <div class="up-btn" data-time-key="hour" t-on-click="hourUp">▲</div>
-                    <input class="hour-input" disabled="" t-model.number="date.hour" type="text" placeholder="hour" />
-                    <div class="down-btn" data-time-key="hour" t-on-click="hourDown">▼</div>
+                    <input
+                        class="hour-input"
+                        disabled=""
+                        t-model.number="date.hour"
+                        type="text"
+                        placeholder="hour"
+                    />
+                    <div
+                        class="down-btn"
+                        data-time-key="hour"
+                        t-on-click="hourDown"
+                    >▼</div>
                 </div>
                 <div class="divider">
                     <span>:</span>
@@ -15,7 +25,11 @@
             </t>
             <t t-if="props.timePicker.minute.enabled">
                 <div class="minute time-segment" data-time-key="minute">
-                    <div class="up-btn" data-time-key="minute" t-on-click="minuteUp">▲</div>
+                    <div
+                        class="up-btn"
+                        data-time-key="minute"
+                        t-on-click="minuteUp"
+                    >▲</div>
                     <input
                         class="minute-input"
                         disabled=""
@@ -23,7 +37,11 @@
                         type="text"
                         placeholder="minute"
                     />
-                    <div class="down-btn" data-time-key="minute" t-on-click="minuteDown">▼</div>
+                    <div
+                        class="down-btn"
+                        data-time-key="minute"
+                        t-on-click="minuteDown"
+                    >▼</div>
                 </div>
                 <div class="divider second-divider">
                     <span>:</span>
@@ -31,7 +49,11 @@
             </t>
             <t t-if="props.timePicker.second.enabled">
                 <div class="second time-segment" data-time-key="second">
-                    <div class="up-btn" data-time-key="second" t-on-click="secondUp">▲</div>
+                    <div
+                        class="up-btn"
+                        data-time-key="second"
+                        t-on-click="secondUp"
+                    >▲</div>
                     <input
                         class="second-input"
                         disabled=""
@@ -39,16 +61,33 @@
                         type="text"
                         placeholder="second"
                     />
-                    <div class="down-btn" data-time-key="second" t-on-click="secondDown">▼</div>
+                    <div
+                        class="down-btn"
+                        data-time-key="second"
+                        t-on-click="secondDown"
+                    >▼</div>
                 </div>
                 <div class="divider meridian-divider" />
                 <div class="divider meridian-divider" />
             </t>
             <t t-if="props.timePicker.meridian.enabled">
-                <div class="meridian time-segment" data-time-key="meridian" t-on-click="meridianUp">
+                <div
+                    class="meridian time-segment"
+                    data-time-key="meridian"
+                    t-on-click="meridianUp"
+                >
                     <div class="up-btn" data-time-key="meridian">▲</div>
-                    <input class="meridian-input" disabled="" t-model="date.meridian" type="text" />
-                    <div class="down-btn" data-time-key="meridian" t-on-click="meridianDown">▼</div>
+                    <input
+                        class="meridian-input"
+                        disabled=""
+                        t-model="date.meridian"
+                        type="text"
+                    />
+                    <div
+                        class="down-btn"
+                        data-time-key="meridian"
+                        t-on-click="meridianDown"
+                    >▼</div>
                 </div>
             </t>
         </div>
@@ -74,7 +113,11 @@
                     class="pwt-btn-calendar"
                     t-on-click="toggleCalendartype"
                 >Switch Calendar</div>
-                <div t-if="props.toolbox.exitButton.enabled" class="pwt-btn-exit" t-on-click="cancel">Cancel</div>
+                <div
+                    t-if="props.toolbox.exitButton.enabled"
+                    class="pwt-btn-exit"
+                    t-on-click="cancel"
+                >Cancel</div>
             </div>
         </t>
         <t t-if="!props.toolbox.enabled">
@@ -89,7 +132,13 @@
 
     <t t-name="l10n_ir_web.DatePicker" owl="1">
         <!-- TODO: add {{cssClass}} to the classess list !-->
-        <div class="o_datepicker" aria-atomic="true" t-att-id="datePickerId" data-target-input="nearest" t-ref="root">
+        <div
+            class="o_datepicker"
+            aria-atomic="true"
+            t-att-id="datePickerId"
+            data-target-input="nearest"
+            t-ref="root"
+        >
             <input
                 t-ref="input"
                 type="text"
@@ -111,7 +160,6 @@
             />
             <span class="o_datepicker_button" />
 
-
             <div
                 class="datepicker-container"
                 t-att-class="{'pwt-hide': state.hide, 'pwt-mobile-view': state.mobileView}"
@@ -121,25 +169,51 @@
                     class="datepicker-plot-area"
                     t-att-class="{'datepicker-plot-area-inline-view': props.isInline,'datepicker-state-no-meridian': !props.timePicker.meridian.enabled, 'datepicker-state-only-time': props.onlyTimePicker,                         'datepicker-state-no-second': !props.timePicker.second.enabled,                         'datepicker-gregorian': state.calendarType == 'gregorian',                         'datepicker-persian': state.calendarType == 'persian',                     }"
                 >
-                    <div t-if="!props.navigatorDisabled" data-navigator="" class="datepicker-navigator">
-                        <div class="pwt-btn pwt-btn-next" t-on-click="navigateNext">&lt;</div>
-                        <div class="pwt-btn pwt-btn-switch" t-out="state.navigatorTitle" t-on-click="toggleNavigate" />
-                        <div class="pwt-btn pwt-btn-prev" t-on-click="navigatePrevious">&gt;</div>
+                    <div
+                        t-if="!props.navigatorDisabled"
+                        data-navigator=""
+                        class="datepicker-navigator"
+                    >
+                        <div class="pwt-btn pwt-btn-next" t-on-click="navigateNext">
+                            &lt;
+                        </div>
+                        <div
+                            class="pwt-btn pwt-btn-switch"
+                            t-out="state.navigatorTitle"
+                            t-on-click="toggleNavigate"
+                        />
+                        <div class="pwt-btn pwt-btn-prev" t-on-click="navigatePrevious">
+                            &gt;
+                        </div>
                     </div>
 
                     <div class="datepicker-grid-view">
-                        <div t-if="state.viewMode === 'day'" class="datepicker-day-view">
+                        <div
+                            t-if="state.viewMode === 'day'"
+                            class="datepicker-day-view"
+                        >
                             <div class="month-grid-box">
                                 <table cellspacing="0" class="table-days">
                                     <thead>
                                         <tr>
-                                            <t t-foreach="state.weekdays.list" t-as="weekday" t-key="weekday">
-                                                <th class="header-row-cell" t-out="weekday" />
+                                            <t
+                                                t-foreach="state.weekdays.list"
+                                                t-as="weekday"
+                                                t-key="weekday"
+                                            >
+                                                <th
+                                                    class="header-row-cell"
+                                                    t-out="weekday"
+                                                />
                                             </t>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr t-foreach="state.days.list" t-as="part" t-key="part_index">
+                                        <tr
+                                            t-foreach="state.days.list"
+                                            t-as="part"
+                                            t-key="part_index"
+                                        >
                                             <td
                                                 t-foreach="part"
                                                 t-as="day"
@@ -165,7 +239,10 @@
                             </div>
                         </div>
 
-                        <div t-if="state.viewMode === 'month'" class="datepicker-month-view">
+                        <div
+                            t-if="state.viewMode === 'month'"
+                            class="datepicker-month-view"
+                        >
                             <div
                                 t-foreach="state.month.list"
                                 t-as="month"
@@ -180,7 +257,10 @@
                             </div>
                         </div>
 
-                        <div t-if="state.viewMode == 'year'" class="datepicker-year-view">
+                        <div
+                            t-if="state.viewMode == 'year'"
+                            class="datepicker-year-view"
+                        >
                             <div
                                 t-foreach="state.year.list"
                                 t-as="year"
@@ -198,7 +278,6 @@
                     <t t-call="l10n_ir_web.DatePickerToolbox" />
                 </div>
             </div>
-
         </div>
     </t>
 

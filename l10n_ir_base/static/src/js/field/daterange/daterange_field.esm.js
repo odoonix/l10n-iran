@@ -1,6 +1,12 @@
 /** @odoo-module **/
 
-import {Component, onWillStart, useEffect, useExternalListener, useRef} from "@odoo/owl";
+import {
+    Component,
+    onWillStart,
+    useEffect,
+    useExternalListener,
+    useRef,
+} from "@odoo/owl";
 import {luxonToMoment, momentToLuxon} from "@web/core/l10n/dates";
 import {loadJS} from "@web/core/assets";
 import {registry} from "@web/core/registry";
@@ -33,15 +39,27 @@ export class VwDateRangeField extends Component {
                             applyLabel: this.env._t("Apply"),
                             cancelLabel: this.env._t("Cancel"),
                         },
-                        startDate: this.startDate ? luxonToMoment(this.startDate) : window.moment(),
-                        endDate: this.endDate ? luxonToMoment(this.endDate) : window.moment(),
+                        startDate: this.startDate
+                            ? luxonToMoment(this.startDate)
+                            : window.moment(),
+                        endDate: this.endDate
+                            ? luxonToMoment(this.endDate)
+                            : window.moment(),
                         drops: "auto",
                     });
-                    this.pickerContainer = window.$(el).data("daterangepicker").container[0];
+                    this.pickerContainer = window
+                        .$(el)
+                        .data("daterangepicker").container[0];
 
-                    window.$(el).on("apply.daterangepicker", this.onPickerApply.bind(this));
-                    window.$(el).on("show.daterangepicker", this.onPickerShow.bind(this));
-                    window.$(el).on("hide.daterangepicker", this.onPickerHide.bind(this));
+                    window
+                        .$(el)
+                        .on("apply.daterangepicker", this.onPickerApply.bind(this));
+                    window
+                        .$(el)
+                        .on("show.daterangepicker", this.onPickerShow.bind(this));
+                    window
+                        .$(el)
+                        .on("hide.daterangepicker", this.onPickerHide.bind(this));
 
                     this.pickerContainer.dataset.name = this.props.name;
                 }
@@ -69,13 +87,19 @@ export class VwDateRangeField extends Component {
         return this.formatValue(this.props.formatType, this.startDate);
     }
     get startDate() {
-        return this.props.record.data[this.props.relatedStartDateField || this.props.name];
+        return this.props.record.data[
+            this.props.relatedStartDateField || this.props.name
+        ];
     }
     get endDate() {
-        return this.props.record.data[this.props.relatedEndDateField || this.props.name];
+        return this.props.record.data[
+            this.props.relatedEndDateField || this.props.name
+        ];
     }
     get relatedDateRangeField() {
-        return this.props.relatedStartDateField ? this.props.relatedStartDateField : this.props.relatedEndDateField;
+        return this.props.relatedStartDateField
+            ? this.props.relatedStartDateField
+            : this.props.relatedEndDateField;
     }
 
     formatValue(format, value) {
@@ -107,17 +131,25 @@ export class VwDateRangeField extends Component {
 
     onWindowScroll(ev) {
         const target = ev.target;
-        if (this.isPickerShown && !this.env.isSmall && (target === window || !this.pickerContainer.contains(target))) {
+        if (
+            this.isPickerShown &&
+            !this.env.isSmall &&
+            (target === window || !this.pickerContainer.contains(target))
+        ) {
             window.$(this.root.el).data("daterangepicker").hide();
         }
     }
 
     async onPickerApply(ev, picker) {
-        const start = this.isDateTime ? picker.startDate : picker.startDate.startOf("day");
+        const start = this.isDateTime
+            ? picker.startDate
+            : picker.startDate.startOf("day");
         const end = this.isDateTime ? picker.endDate : picker.endDate.startOf("day");
         const dates = [start, end].map(momentToLuxon);
         await this.updateRange(dates[0], dates[1]);
-        const input = document.querySelector(`.o_field_daterange[name='${this.relatedDateRangeField}'] input`);
+        const input = document.querySelector(
+            `.o_field_daterange[name='${this.relatedDateRangeField}'] input`
+        );
         const target = window.$(input).data("daterangepicker");
         target.setStartDate(picker.startDate);
         target.setEndDate(picker.endDate);

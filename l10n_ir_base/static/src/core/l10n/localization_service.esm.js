@@ -27,7 +27,8 @@ export const localizationService = {
     dependencies: ["user"],
     start: async (env, {user}) => {
         const cacheHashes = session.cache_hashes || {};
-        const translationsHash = cacheHashes.translations || new Date().getTime().toString();
+        const translationsHash =
+            cacheHashes.translations || new Date().getTime().toString();
         const lang = user.lang || null;
         const translationURL = session.translationURL || "/web/webclient/translations";
         let url = `${translationURL}/${translationsHash}`;
@@ -40,7 +41,11 @@ export const localizationService = {
             throw new Error("Error while fetching translations");
         }
 
-        const {lang_parameters: userLocalization, modules, multi_lang: multiLang} = await response.json();
+        const {
+            lang_parameters: userLocalization,
+            modules,
+            multi_lang: multiLang,
+        } = await response.json();
 
         // FIXME We flatten the result of the python route.
         // Eventually, we want a new python route to return directly the good result.

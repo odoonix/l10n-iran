@@ -449,7 +449,10 @@ export class PersianDate {
         }
         if (this.calendarType === "persian" && this.leapYearMode === "algorithmic") {
             return this.algorithms.calcPersian(dateArray);
-        } else if (this.calendarType === "persian" && this.leapYearMode === "astronomical") {
+        } else if (
+            this.calendarType === "persian" &&
+            this.leapYearMode === "astronomical"
+        ) {
             return this.algorithms.calcPersiana(dateArray);
         } else if (this.calendarType === "gregorian") {
             dateArray[1] -= 1;
@@ -624,7 +627,13 @@ export class PersianDate {
      */
     minutes(input) {
         if (input || input === 0) {
-            this.algorithmsCalc([this.year(), this.month(), this.date(), this.hour(), input]);
+            this.algorithmsCalc([
+                this.year(),
+                this.month(),
+                this.date(),
+                this.hour(),
+                input,
+            ]);
             return this;
         }
         return this.State.gDate.getMinutes();
@@ -644,7 +653,14 @@ export class PersianDate {
      */
     seconds(input) {
         if (input || input === 0) {
-            this.algorithmsCalc([this.year(), this.month(), this.date(), this.hour(), this.minute(), input]);
+            this.algorithmsCalc([
+                this.year(),
+                this.month(),
+                this.date(),
+                this.hour(),
+                this.minute(),
+                input,
+            ]);
             return this;
         }
         return this.State.gDate.getSeconds();
@@ -751,14 +767,14 @@ export class PersianDate {
                 val === "seconds" || val === "second"
                     ? diff / 1e3
                     : val === "minutes" || val === "minute"
-                    ? diff / 6e4
-                    : val === "hours" || val === "hour"
-                    ? diff / 36e5
-                    : val === "days" || val === "day"
-                    ? diff / 864e5
-                    : val === "weeks" || val === "week"
-                    ? diff / 6048e5
-                    : diff;
+                      ? diff / 6e4
+                      : val === "hours" || val === "hour"
+                        ? diff / 36e5
+                        : val === "days" || val === "day"
+                          ? diff / 864e5
+                          : val === "weeks" || val === "week"
+                            ? diff / 6048e5
+                            : diff;
         }
         return asFloat ? output : Math.round(output);
     }
@@ -768,8 +784,12 @@ export class PersianDate {
      * @returns {*}
      */
     startOf(key) {
-        const syncedCelander = PersianDate.toCalendar(this.calendarType).toLocale(this.localType);
-        const newArray = new PersianDate(this.valueOf() - (this.calendar().weekday - 1) * 86400000).toArray();
+        const syncedCelander = PersianDate.toCalendar(this.calendarType).toLocale(
+            this.localType
+        );
+        const newArray = new PersianDate(
+            this.valueOf() - (this.calendar().weekday - 1) * 86400000
+        ).toArray();
         // Simplify this\
         /* jshint ignore:start */
         switch (key) {
@@ -781,13 +801,34 @@ export class PersianDate {
                 return new syncedCelander([this.year(), this.month(), 1]);
             case "days":
             case "day":
-                return new syncedCelander([this.year(), this.month(), this.date(), 0, 0, 0]);
+                return new syncedCelander([
+                    this.year(),
+                    this.month(),
+                    this.date(),
+                    0,
+                    0,
+                    0,
+                ]);
             case "hours":
             case "hour":
-                return new syncedCelander([this.year(), this.month(), this.date(), this.hours(), 0, 0]);
+                return new syncedCelander([
+                    this.year(),
+                    this.month(),
+                    this.date(),
+                    this.hours(),
+                    0,
+                    0,
+                ]);
             case "minutes":
             case "minute":
-                return new syncedCelander([this.year(), this.month(), this.date(), this.hours(), this.minutes(), 0]);
+                return new syncedCelander([
+                    this.year(),
+                    this.month(),
+                    this.date(),
+                    this.hours(),
+                    this.minutes(),
+                    0,
+                ]);
             case "seconds":
             case "second":
                 return new syncedCelander([
@@ -813,7 +854,9 @@ export class PersianDate {
      */
     /* eslint-disable no-case-declarations */
     endOf(key) {
-        const syncedCelander = PersianDate.toCalendar(this.calendarType).toLocale(this.localType);
+        const syncedCelander = PersianDate.toCalendar(this.calendarType).toLocale(
+            this.localType
+        );
         // Simplify this
         switch (key) {
             case "years":
@@ -823,16 +866,44 @@ export class PersianDate {
             case "months":
             case "month":
                 const monthDays = this.daysInMonth(this.year(), this.month());
-                return new syncedCelander([this.year(), this.month(), monthDays, 23, 59, 59]);
+                return new syncedCelander([
+                    this.year(),
+                    this.month(),
+                    monthDays,
+                    23,
+                    59,
+                    59,
+                ]);
             case "days":
             case "day":
-                return new syncedCelander([this.year(), this.month(), this.date(), 23, 59, 59]);
+                return new syncedCelander([
+                    this.year(),
+                    this.month(),
+                    this.date(),
+                    23,
+                    59,
+                    59,
+                ]);
             case "hours":
             case "hour":
-                return new syncedCelander([this.year(), this.month(), this.date(), this.hours(), 59, 59]);
+                return new syncedCelander([
+                    this.year(),
+                    this.month(),
+                    this.date(),
+                    this.hours(),
+                    59,
+                    59,
+                ]);
             case "minutes":
             case "minute":
-                return new syncedCelander([this.year(), this.month(), this.date(), this.hours(), this.minutes(), 59]);
+                return new syncedCelander([
+                    this.year(),
+                    this.month(),
+                    this.date(),
+                    this.hours(),
+                    this.minutes(),
+                    59,
+                ]);
             case "seconds":
             case "second":
                 return new syncedCelander([
@@ -846,7 +917,11 @@ export class PersianDate {
             case "weeks":
             case "week":
                 const weekDayNumber = this.calendar().weekday;
-                return new syncedCelander([this.year(), this.month(), this.date() + (7 - weekDayNumber)]);
+                return new syncedCelander([
+                    this.year(),
+                    this.month(),
+                    this.date() + (7 - weekDayNumber),
+                ]);
             default:
                 return this.clone();
         }
@@ -957,7 +1032,11 @@ export class PersianDate {
     isDST() {
         const month = this.month(),
             day = this.date();
-        if ((month === 1 && day > 1) || (month === 6 && day < 31) || (month < 6 && month >= 2)) {
+        if (
+            (month === 1 && day > 1) ||
+            (month === 6 && day < 31) ||
+            (month < 6 && month >= 2)
+        ) {
             return true;
         }
         return false;
@@ -1017,7 +1096,15 @@ export class PersianDate {
      * @returns {Array}
      */
     toArray() {
-        return [this.year(), this.month(), this.date(), this.hour(), this.minute(), this.second(), this.millisecond()];
+        return [
+            this.year(),
+            this.month(),
+            this.date(),
+            this.hour(),
+            this.minute(),
+            this.second(),
+            this.millisecond(),
+        ];
     }
 
     /**
@@ -1198,7 +1285,7 @@ export class PersianDate {
     }
 
     /**
-     * @desc check if a month is same as b
+     * @description check if a month is same as b
      * @param {Date} dateA
      * @param {Date} dateB
      * @returns {Boolean}
@@ -1206,17 +1293,27 @@ export class PersianDate {
      * @static
      */
     static isSameMonth(dateA, dateB) {
-        return dateA && dateB && dateA.year() === dateB.year() && dateA.month() === dateB.month();
+        return (
+            dateA &&
+            dateB &&
+            dateA.year() === dateB.year() &&
+            dateA.month() === dateB.month()
+        );
     }
 
     /**
-     * @desc check two for month similarity
+     * @description check two for month similarity
      * @param {*} dateB
      * @since 1.0.0
      * @returns {*|Boolean}
      */
     isSameMonth(dateB) {
-        return this && dateB && this.year() === dateB.year() && this.month() === dateB.month();
+        return (
+            this &&
+            dateB &&
+            this.year() === dateB.year() &&
+            this.month() === dateB.month()
+        );
     }
 }
 

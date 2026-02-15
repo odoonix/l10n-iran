@@ -19,7 +19,8 @@ export class Duration {
         const data = (this._data = {});
         let milliseconds = 0;
         duration[unit] = normalizedUnit.value;
-        milliseconds = duration.milliseconds || duration.millisecond || duration.ms || 0;
+        milliseconds =
+            duration.milliseconds || duration.millisecond || duration.ms || 0;
 
         let years = duration.years || duration.year || duration.y || 0,
             months = duration.months || duration.month || duration.M || 0;
@@ -29,7 +30,8 @@ export class Duration {
             minutes = duration.minutes || duration.minute || duration.m || 0,
             seconds = duration.seconds || duration.second || duration.s || 0;
         // Representation for dateAddRemove
-        this._milliseconds = milliseconds + seconds * 1e3 + minutes * 6e4 + hours * 36e5;
+        this._milliseconds =
+            milliseconds + seconds * 1e3 + minutes * 6e4 + hours * 36e5;
         // Because of dateAddRemove treats 24 hours as different from a
         // day when working around DST, we need to store them separately
         this._days = days + weeks * 7;
