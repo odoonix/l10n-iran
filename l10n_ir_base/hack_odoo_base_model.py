@@ -38,7 +38,13 @@ def _read_group_process_groupby(self, gb, query):
     split = gb.split(":")
     field = self._fields.get(split[0])
     if not field:
-        raise ValueError("Invalid field %r on model %r" % (split[0], self._name))
+        raise ValueError(
+            self.env._(
+                "Invalid field %(field)s on model %(model)s",
+                field=split[0],
+                model=self._name,
+            )
+        )
     field_type = field.type
     gb_function = split[1] if len(split) == 2 else None
     temporal = field_type in ("date", "datetime")
