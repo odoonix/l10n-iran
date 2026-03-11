@@ -6,7 +6,7 @@
     'category': 'Tools',
     'summary': 'Web Iran Localization with Jalali calendar support for date picker',
     'depends': [
-        'l10n_ir_base',
+        # 'l10n_ir_base',
         'web'
     ],
     'data': [],

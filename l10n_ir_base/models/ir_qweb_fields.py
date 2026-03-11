@@ -1,14 +1,8 @@
 import datetime
-
-##################################################################################################
-# Viraweb123 Patch
-# TODO: move this part into the patch project
-##################################################################################################
 import jdatetime
 from markupsafe import Markup
 from persiantools import digits
 
-import odoo
 from odoo import api, fields, models
 from odoo.tools import format_date
 from odoo.tools.misc import get_lang
@@ -38,13 +32,13 @@ def hack_format_date(env, value, lang_code=False, date_format=False):
             return ""
         if len(value) > DATE_LENGTH:
             # a datetime, convert to correct timezone
-            value = odoo.fields.Datetime.from_string(value)
-            value = odoo.fields.Datetime.context_timestamp(env["res.lang"], value)
+            value = fields.Datetime.from_string(value)
+            value = fields.Datetime.context_timestamp(env["res.lang"], value)
         else:
-            value = odoo.fields.Datetime.from_string(value)
+            value = fields.Datetime.from_string(value)
     elif isinstance(value, datetime.datetime) and not value.tzinfo:
         # a datetime, convert to correct timezone
-        value = odoo.fields.Datetime.context_timestamp(env["res.lang"], value)
+        value = fields.Datetime.context_timestamp(env["res.lang"], value)
 
     if not date_format:
         date_format = lang.date_format
@@ -55,24 +49,15 @@ def hack_format_date(env, value, lang_code=False, date_format=False):
     strval = digits.en_to_fa(strval)
     return strval
 
-
-# parse_date
-# format_datetime
-
-# hacks
-# _logger.info("patching tools.format_date")
-# format_date=hack_format_date
-
-
-##################################################################################################
+########################################################################################
 # Fields
-##################################################################################################
+########################################################################################
 class FieldConverter(models.AbstractModel):
     _inherit = "ir.qweb.field"
 
     @api.model
     def value_to_html(self, value, options):
-        if self.user_lang().code == "fa_IR":
+        if self.env.user.lang == "fa_IR":
             value = digits.en_to_fa(value)
         return super().value_to_html(value, options)
 
@@ -83,7 +68,29 @@ class ManyToOneConverter(models.AbstractModel):
     @api.model
     def value_to_html(self, value, options):
         res = super().value_to_html(value, options)
-        if self.user_lang().code == "fa_IR":
+        if self.env.user.lang == "fa_IR":
+            return digits.en_to_fa(str(res))
+        return res
+
+
+class ManyToManyConverter(models.AbstractModel):
+    _inherit = "ir.qweb.field.many2many"
+
+    @api.model
+    def value_to_html(self, value, options):
+        res = super().value_to_html(value, options)
+        if self.env.user.lang == "fa_IR":
+            return digits.en_to_fa(str(res))
+        return res
+
+
+class OneToManyConverter(models.AbstractModel):
+    _inherit = "ir.qweb.field.one2many"
+
+    @api.model
+    def value_to_html(self, value, options):
+        res = super().value_to_html(value, options)
+        if self.env.user.lang == "fa_IR":
             return digits.en_to_fa(str(res))
         return res
 
@@ -94,8 +101,30 @@ class IntegerConverter(models.AbstractModel):
     @api.model
     def value_to_html(self, value, options):
         res = super().value_to_html(value, options)
-        if self.user_lang().code == "fa_IR":
+        if self.env.user.lang == "fa_IR":
             return digits.en_to_fa(str(res))
+        return res
+
+
+class FloatConverter(models.AbstractModel):
+    _inherit = "ir.qweb.field.float"
+
+    @api.model
+    def value_to_html(self, value, options):
+        res = super().value_to_html(value, options)
+        if self.env.user.lang == "fa_IR":
+            return digits.en_to_fa(str(res))
+        return res
+
+
+class MonetaryConverter(models.AbstractModel):
+    _inherit = "ir.qweb.field.monetary"
+
+    @api.model
+    def value_to_html(self, value, options):
+        res = super().value_to_html(value, options)
+        if self.env.user.lang == "fa_IR":
+            return Markup(digits.en_to_fa(str(res)))
         return res
 
 
@@ -104,7 +133,7 @@ class TextConverter(models.AbstractModel):
 
     @api.model
     def value_to_html(self, value, options):
-        if self.user_lang().code == "fa_IR":
+        if self.env.user.lang == "fa_IR":
             value = digits.en_to_fa(str(value))
         return super().value_to_html(value, options)
 
@@ -116,8 +145,8 @@ class PhoneConverter(models.AbstractModel):
 
     @api.model
     def value_to_html(self, value, options):
-        lang = self.user_lang()
-        if lang.code == "fa_IR":
+        lang = self.env.user.lang
+        if lang == "fa_IR":
             value = digits.en_to_fa(value)
             patt = '<span dir="ltr" style="unicode-bidi:isolate;">{}</span>'
         else:
@@ -133,8 +162,8 @@ class DateConverter(models.AbstractModel):
         if not value:
             return ""
 
-        lang = self.user_lang()
-        if lang.code != "fa_IR":
+        lang = self.env.user.lang
+        if lang != "fa_IR":
             return super().value_to_html(value, options)
 
         return hack_format_date(self.env, value, date_format=options.get("format"))
@@ -148,7 +177,7 @@ class DateTimeConverter(models.AbstractModel):
         if not value:
             return ""
 
-        lang = self.user_lang()
+        lang = self.env['res.lang']._get_data(code=self.env.user.lang)
         if lang.code != "fa_IR":
             return super().value_to_html(value, options)
 
@@ -175,7 +204,8 @@ class DateTimeConverter(models.AbstractModel):
             elif options.get("date_only"):
                 strftime_pattern = "%s" % (lang.date_format)
             else:
-                strftime_pattern = "%s %s" % (lang.date_format, lang.time_format)
+                strftime_pattern = "%s %s" % (
+                    lang.date_format, lang.time_format)
 
             # pattern = posix_to_ldml(strftime_pattern, locale=locale)
             pattern = strftime_pattern
