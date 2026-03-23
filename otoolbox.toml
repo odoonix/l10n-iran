@@ -1,0 +1,10 @@
+[defaults]
+repository = "l10n-iran"
+organization = "odoonix"
+title = "l10n-iran"
+summary = "l10n-iran"
+home  = "https://github.com/odoonix/l10n-iran"
+version = "17.0"
+tags = ["16.0", "17.0", "18.0"]
+compatilbe = ["community", "enterprice"]
+license = "GPL"
