@@ -8,9 +8,3 @@ version = "18.0"
 tags = ["18.0"]
 compatilbe = ["community", "enterprice"]
 license = "GPL"
-
-
-
-
-
-

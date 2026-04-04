@@ -1,4 +1,5 @@
 import datetime
+
 import jdatetime
 from markupsafe import Markup
 from persiantools import digits
@@ -48,6 +49,7 @@ def hack_format_date(env, value, lang_code=False, date_format=False):
     strval = jdate.strftime(date_format)
     strval = digits.en_to_fa(strval)
     return strval
+
 
 ########################################################################################
 # Fields
@@ -177,7 +179,7 @@ class DateTimeConverter(models.AbstractModel):
         if not value:
             return ""
 
-        lang = self.env['res.lang']._get_data(code=self.env.user.lang)
+        lang = self.env["res.lang"]._get_data(code=self.env.user.lang)
         if lang.code != "fa_IR":
             return super().value_to_html(value, options)
 
@@ -204,8 +206,7 @@ class DateTimeConverter(models.AbstractModel):
             elif options.get("date_only"):
                 strftime_pattern = "%s" % (lang.date_format)
             else:
-                strftime_pattern = "%s %s" % (
-                    lang.date_format, lang.time_format)
+                strftime_pattern = "%s %s" % (lang.date_format, lang.time_format)
 
             # pattern = posix_to_ldml(strftime_pattern, locale=locale)
             pattern = strftime_pattern

@@ -1,14 +1,20 @@
 /** @odoo-module **/
-import { markRaw, reactive } from "@odoo/owl";
-import { areDatesEqual, formatDate, formatDateTime, parseDate, parseDateTime } from "@web/core/l10n/dates";
-import { makePopover } from "@web/core/popover/popover_hook";
-import { ensureArray, zip, zipWith } from "@web/core/utils/arrays";
-import { deepCopy, shallowEqual } from "@web/core/utils/objects";
-import { DateTimePicker } from "@web/core/datetime/datetime_picker";
-import { DateTimePickerPopover } from "@web/core/datetime/datetime_picker_popover";
-import { patch } from "@web/core/utils/patch";
-import { localization } from "@web/core/l10n/localization";
-import { datetimePickerService } from "@web/core/datetime/datetimepicker_service";
+import {markRaw, reactive} from "@odoo/owl";
+import {
+    areDatesEqual,
+    formatDate,
+    formatDateTime,
+    parseDate,
+    parseDateTime,
+} from "@web/core/l10n/dates";
+import {makePopover} from "@web/core/popover/popover_hook";
+import {ensureArray, zip, zipWith} from "@web/core/utils/arrays";
+import {deepCopy, shallowEqual} from "@web/core/utils/objects";
+import {DateTimePicker} from "@web/core/datetime/datetime_picker";
+import {DateTimePickerPopover} from "@web/core/datetime/datetime_picker_popover";
+import {patch} from "@web/core/utils/patch";
+import {localization} from "@web/core/l10n/localization";
+import {datetimePickerService} from "@web/core/datetime/datetimepicker_service";
 
 const arePropsEqual = (obj1, obj2) =>
     shallowEqual(obj1, obj2, (a, b) => areDatesEqual(a, b) || shallowEqual(a, b));
@@ -28,13 +34,14 @@ const parsers = {
 };
 
 patch(datetimePickerService, {
-    start(env, { popover: popoverService }) {
+    start(env, {popover: popoverService}) {
         return {
             create: (hookParams, getInputs = () => [hookParams.target, null]) => {
                 const createPopover =
                     hookParams.createPopover ??
                     ((...args) => makePopover(popoverService.add, ...args));
-                const ensureVisibility = hookParams.ensureVisibility ?? (() => env.isSmall);
+                const ensureVisibility =
+                    hookParams.ensureVisibility ?? (() => env.isSmall);
                 const popover = createPopover(DateTimePickerPopover, {
                     onClose: () => {
                         if (!allowOnClose) {
@@ -64,16 +71,24 @@ patch(datetimePickerService, {
                     const nextInitialProps = markValuesRaw(hookParams.pickerProps);
                     const propsCopy = deepCopy(nextInitialProps);
 
-                    if (lastInitialProps && arePropsEqual(lastInitialProps, propsCopy)) {
+                    if (
+                        lastInitialProps &&
+                        arePropsEqual(lastInitialProps, propsCopy)
+                    ) {
                         return;
                     }
 
                     lastInitialProps = propsCopy;
                     lastAppliedValue = propsCopy.value;
-                    inputsChanged = ensureArray(lastInitialProps.value).map(() => false);
+                    inputsChanged = ensureArray(lastInitialProps.value).map(
+                        () => false
+                    );
 
                     for (const [key, value] of Object.entries(nextInitialProps)) {
-                        if (pickerProps[key] !== value && !areDatesEqual(pickerProps[key], value)) {
+                        if (
+                            pickerProps[key] !== value &&
+                            !areDatesEqual(pickerProps[key], value)
+                        ) {
                             pickerProps[key] = value;
                         }
                     }
@@ -86,7 +101,7 @@ patch(datetimePickerService, {
                         return;
                     }
 
-                    const { activeElement } = inputEl.ownerDocument;
+                    const {activeElement} = inputEl.ownerDocument;
                     if (activeElement !== inputEl) {
                         inputEl.focus();
                     }
@@ -111,7 +126,9 @@ patch(datetimePickerService, {
                         const inputEls = getInputs();
                         while (
                             parentElement &&
-                            !inputEls.every((inputEl) => parentElement.contains(inputEl))
+                            !inputEls.every((inputEl) =>
+                                parentElement.contains(inputEl)
+                            )
                         ) {
                             parentElement = parentElement.parentElement;
                         }
@@ -141,11 +158,11 @@ patch(datetimePickerService, {
                     }
                 };
 
-                const onInputClick = ({ target }) => {
+                const onInputClick = ({target}) => {
                     openPicker(target === getInput(1) ? 1 : 0);
                 };
 
-                const onInputFocus = ({ target }) => {
+                const onInputFocus = ({target}) => {
                     pickerProps.focusedDateIndex = target === getInput(1) ? 1 : 0;
                     setInputFocus(target);
                 };
@@ -179,14 +196,14 @@ patch(datetimePickerService, {
                     if (!popover.isOpen) {
                         const popoverTarget = getPopoverTarget();
                         if (ensureVisibility()) {
-                            const { marginBottom } = popoverTarget.style.marginBottom;
+                            const {marginBottom} = popoverTarget.style.marginBottom;
                             popoverTarget.style.marginBottom = `100vh`;
                             popoverTarget.scrollIntoView(true);
                             restoreTargetMargin = async () => {
                                 popoverTarget.style.marginBottom = marginBottom;
                             };
                         }
-                        popover.open(popoverTarget, { pickerProps });
+                        popover.open(popoverTarget, {pickerProps});
                     }
 
                     focusActiveInput();
@@ -194,9 +211,11 @@ patch(datetimePickerService, {
 
                 // --- Modified: Correct handling of format and parse ---
                 const safeConvert = (operation, value) => {
-                    const { type } = pickerProps;
-                    const convertFn = (operation === "format" ? formatters : parsers)[type];
-                    const options = { tz: pickerProps.tz, format: hookParams.format };
+                    const {type} = pickerProps;
+                    const convertFn = (operation === "format" ? formatters : parsers)[
+                        type
+                    ];
+                    const options = {tz: pickerProps.tz, format: hookParams.format};
                     if (operation === "format") {
                         options.showSeconds = hookParams.showSeconds ?? true;
                         options.condensed = hookParams.condensed || false;
@@ -247,7 +266,10 @@ patch(datetimePickerService, {
                 const setFocusClass = (input) => {
                     for (const el of getInputs()) {
                         if (el) {
-                            el.classList.toggle(FOCUS_CLASSNAME, popover.isOpen && el === input);
+                            el.classList.toggle(
+                                FOCUS_CLASSNAME,
+                                popover.isOpen && el === input
+                            );
                         }
                     }
                 };
@@ -283,9 +305,11 @@ patch(datetimePickerService, {
                                 pickerProps.focusedDateIndex === 0 ||
                                 (value[0] && value[1] && value[1] < value[0])
                             ) {
-                                const { year, month, day } = value[pickerProps.focusedDateIndex];
+                                const {year, month, day} =
+                                    value[pickerProps.focusedDateIndex];
                                 for (let i = 0; i < value.length; i++) {
-                                    value[i] = value[i] && value[i].set({ year, month, day });
+                                    value[i] =
+                                        value[i] && value[i].set({year, month, day});
                                 }
                                 pickerProps.focusedDateIndex = 1;
                             } else {
@@ -311,7 +335,10 @@ patch(datetimePickerService, {
                             // --- Start of fix ---
                             // If the value inside the input is exactly equal to the formatted display value of the current state,
                             // it means it wasn't a manual change by the user.
-                            const [currentFormatted] = safeConvert("format", currentValue);
+                            const [currentFormatted] = safeConvert(
+                                "format",
+                                currentValue
+                            );
                             if (el.value === currentFormatted) {
                                 return currentValue; // Return the original (Gregorian) value, don't re-parse
                             }
@@ -326,7 +353,11 @@ patch(datetimePickerService, {
                             }
                         }
                     );
-                    updateValue(values.length === 2 ? values : values[0], "date", "input");
+                    updateValue(
+                        values.length === 2 ? values : values[0],
+                        "date",
+                        "input"
+                    );
                 };
                 // -----------------------------------------------------------
 
@@ -345,7 +376,7 @@ patch(datetimePickerService, {
                     const currentIsRange = pickerProps.range;
                     if (popover.isOpen && lastIsRange !== currentIsRange) {
                         allowOnClose = false;
-                        popover.open(getPopoverTarget(), { pickerProps });
+                        popover.open(getPopoverTarget(), {pickerProps});
                         allowOnClose = true;
                     }
                     lastIsRange = currentIsRange;
@@ -388,7 +419,12 @@ patch(datetimePickerService, {
                             true
                         )) {
                             updateInput(el, value);
-                            if (el && !el.disabled && !el.readOnly && !listenedElements.has(el)) {
+                            if (
+                                el &&
+                                !el.disabled &&
+                                !el.readOnly &&
+                                !listenedElements.has(el)
+                            ) {
                                 listenedElements.add(el);
                                 el.addEventListener("change", onInputChange);
                                 el.addEventListener("click", onInputClick);
@@ -397,12 +433,14 @@ patch(datetimePickerService, {
                                 editableInputs++;
                             }
                         }
-                        const calendarIconGroupEl = getInput(0)?.parentElement.querySelector(
-                            ".o_input_group_date_icon"
-                        );
+                        const calendarIconGroupEl = getInput(
+                            0
+                        )?.parentElement.querySelector(".o_input_group_date_icon");
                         if (calendarIconGroupEl) {
                             calendarIconGroupEl.classList.add("cursor-pointer");
-                            calendarIconGroupEl.addEventListener("click", () => openPicker(0));
+                            calendarIconGroupEl.addEventListener("click", () =>
+                                openPicker(0)
+                            );
                         }
                         if (!editableInputs && popover.isOpen) {
                             saveAndClose();

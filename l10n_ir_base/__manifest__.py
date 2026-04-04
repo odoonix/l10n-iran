@@ -5,10 +5,7 @@
     "website": "https://github.com/moonsun/l10n-iran",
     "license": "LGPL-3",
     "category": "Website",
-    "depends": [
-        "base",
-        "sale"
-    ],
+    "depends": ["base", "sale"],
     "data": [],
     "installable": True,
     "external_dependencies": {

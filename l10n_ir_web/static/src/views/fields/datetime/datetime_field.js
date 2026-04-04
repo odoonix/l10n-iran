@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
-import { patch } from "@web/core/utils/patch";
-import { localization } from "@web/core/l10n/localization";
-import { registry } from "@web/core/registry";
-import { DateTimeField } from "@web/views/fields/datetime/datetime_field";
+import {patch} from "@web/core/utils/patch";
+import {localization} from "@web/core/l10n/localization";
+import {registry} from "@web/core/registry";
+import {DateTimeField} from "@web/views/fields/datetime/datetime_field";
 
 // List and kanban view
 const formatters = registry.category("formatters");
@@ -36,21 +36,29 @@ function formatJalaliDateTime(dt) {
 
 // Add new formatter with force: true
 // But this time, if the language is English, we call the original function so it doesn't return null
-formatters.add("date", (value, options) => {
-    if (localization.code === "fa_IR") {
-        return formatJalaliDate(value);
-    }
-    // Execute original formatter for other languages
-    return originalDateFormatter(value, options);
-}, { force: true });
+formatters.add(
+    "date",
+    (value, options) => {
+        if (localization.code === "fa_IR") {
+            return formatJalaliDate(value);
+        }
+        // Execute original formatter for other languages
+        return originalDateFormatter(value, options);
+    },
+    {force: true}
+);
 
-formatters.add("datetime", (value, options) => {
-    if (localization.code === "fa_IR") {
-        return formatJalaliDateTime(value);
-    }
-    // Execute original formatter for other languages
-    return originalDateTimeFormatter(value, options);
-}, { force: true });
+formatters.add(
+    "datetime",
+    (value, options) => {
+        if (localization.code === "fa_IR") {
+            return formatJalaliDateTime(value);
+        }
+        // Execute original formatter for other languages
+        return originalDateTimeFormatter(value, options);
+    },
+    {force: true}
+);
 
 // Read only field
 patch(DateTimeField.prototype, {
@@ -63,7 +71,7 @@ patch(DateTimeField.prototype, {
             return super.getFormattedValue(valueIndex);
         }
 
-        const { condensed, showSeconds, showTime } = this.props;
+        const {condensed, showSeconds, showTime} = this.props;
 
         // Only for Persian language
         const options = {

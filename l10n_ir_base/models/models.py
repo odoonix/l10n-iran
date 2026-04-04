@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import datetime
@@ -7,40 +6,39 @@ import math
 import babel.dates
 import jdatetime
 import pytz
-from persiantools import digits
 
 from odoo import api, models
 from odoo.osv import expression
 from odoo.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT,
+    date_utils,
     get_lang,
-    date_utils
 )
 
 # ثابت‌های مورد نیاز (اگر در محیط شما تعریف نشده‌اند، اینجا تعریف می‌شوند)
 # معمولا این‌ها در odoo.tools یا odoo.models تعریف هستند اما برای اطمینان:
 READ_GROUP_TIME_GRANULARITY = {
-    'day': datetime.timedelta(days=1),
-    'week': datetime.timedelta(days=7),
-    'month': datetime.timedelta(days=30), # تقریبی
-    'quarter': datetime.timedelta(days=90), # تقریبی
-    'year': datetime.timedelta(days=365),
+    "day": datetime.timedelta(days=1),
+    "week": datetime.timedelta(days=7),
+    "month": datetime.timedelta(days=30),  # تقریبی
+    "quarter": datetime.timedelta(days=90),  # تقریبی
+    "year": datetime.timedelta(days=365),
 }
 
 READ_GROUP_DISPLAY_FORMAT = {
-    'day': 'dd MMM yyyy',
-    'week': "'W'w YYYY",
-    'month': 'MMMM yyyy',
-    'quarter': 'QQQ yyyy',
-    'year': 'yyyy',
+    "day": "dd MMM yyyy",
+    "week": "'W'w YYYY",
+    "month": "MMMM yyyy",
+    "quarter": "QQQ yyyy",
+    "year": "yyyy",
 }
 
-READ_GROUP_NUMBER_GRANULARITY = [] # معمولا برای فیلدهای عددی استفاده می‌شود
+READ_GROUP_NUMBER_GRANULARITY = []  # معمولا برای فیلدهای عددی استفاده می‌شود
 
 
 class BaseModel(models.AbstractModel):
-    _inherit = 'base'
+    _inherit = "base"
 
     @api.model
     def format_label_custom(self, gb, jdate):
@@ -49,7 +47,7 @@ class BaseModel(models.AbstractModel):
         """
         # لیست نام فصل‌های شمسی (باید در کلاس یا ماژول تعریف شده باشد)
         # اگر تعریف نشده، اینجا اضافه می‌کنیم:
-        quarter_jalali = ['بهار', 'تابستان', 'پاییز', 'زمستان']
+        quarter_jalali = ["بهار", "تابستان", "پاییز", "زمستان"]
 
         # در نسخه ۱۸، gb یک رشته است (مثل 'date:month')، نه دیکشنری
         granularity = gb
@@ -60,15 +58,14 @@ class BaseModel(models.AbstractModel):
         else:
             # فرمت‌های پیش‌فرض برای شمسی
             formats = {
-                'day': '%Y/%m/%d',
-                'week': '%W %Y', # هفته و سال
-                'month': '%Y %B', # سال و نام ماه
-                'year': '%Y',
+                "day": "%Y/%m/%d",
+                "week": "%W %Y",  # هفته و سال
+                "month": "%Y %B",  # سال و نام ماه
+                "year": "%Y",
             }
-            fmt = formats.get(granularity, '%Y %m')
+            fmt = formats.get(granularity, "%Y %m")
             label = jdate.strftime(fmt)
         return label
-
 
     @api.model
     def _read_group_format_result(self, rows_dict, lazy_groupby):
@@ -84,15 +81,15 @@ class BaseModel(models.AbstractModel):
         lang = get_lang(self.env)
 
         for group in lazy_groupby:
-            field_name = group.split(':')[0].split('.')[0]
+            field_name = group.split(":")[0].split(".")[0]
             field = self._fields[field_name]
 
-            if field.type in ('date', 'datetime'):
-                granularity = group.split(':')[1] if ':' in group else 'month'
+            if field.type in ("date", "datetime"):
+                granularity = group.split(":")[1] if ":" in group else "month"
                 if granularity in READ_GROUP_TIME_GRANULARITY:
                     locale = get_lang(self.env).code
 
-                    if field.type == 'datetime':
+                    if field.type == "datetime":
                         fmt = DEFAULT_SERVER_DATETIME_FORMAT
                     else:
                         fmt = DEFAULT_SERVER_DATE_FORMAT
@@ -106,51 +103,56 @@ class BaseModel(models.AbstractModel):
 
                 if isinstance(value, models.BaseModel):
                     row[group] = (
-                        value.id, value.sudo().display_name) if value else False
+                        (value.id, value.sudo().display_name) if value else False
+                    )
                     value = value.id
 
-                if not value and field.type == 'many2many':
-                    additional_domain = [(field_name, 'not any', [])]
+                if not value and field.type == "many2many":
+                    additional_domain = [(field_name, "not any", [])]
                 else:
-                    additional_domain = [(field_name, '=', value)]
+                    additional_domain = [(field_name, "=", value)]
 
-                if field.type in ('date', 'datetime'):
+                if field.type in ("date", "datetime"):
                     if value and isinstance(value, (datetime.date, datetime.datetime)):
                         range_start = value
                         range_end = value + interval
-                        if field.type == 'datetime':
+                        if field.type == "datetime":
                             tzinfo = None
-                            if self._context.get('tz') in pytz.all_timezones_set:
-                                tzinfo = pytz.timezone(self._context['tz'])
-                                range_start = tzinfo.localize(
-                                    range_start).astimezone(pytz.utc)
+                            if self._context.get("tz") in pytz.all_timezones_set:
+                                tzinfo = pytz.timezone(self._context["tz"])
+                                range_start = tzinfo.localize(range_start).astimezone(
+                                    pytz.utc
+                                )
                                 # take into account possible hour change between start
                                 # and end
-                                range_end = tzinfo.localize(
-                                    range_end).astimezone(pytz.utc)
+                                range_end = tzinfo.localize(range_end).astimezone(
+                                    pytz.utc
+                                )
 
                         # --- تغییرات شمسی ---
                         if lang.code == "fa_IR":
                             jdate = jdatetime.datetime.fromgregorian(
-                                date=value, locale="fa_IR")
+                                date=value, locale="fa_IR"
+                            )
                             label = self.format_label_custom(granularity, jdate)
                         else:
                             # --- منطق استاندارد اصلی اودوو ---
-                            if field.type == 'datetime':
+                            if field.type == "datetime":
                                 label = babel.dates.format_datetime(
                                     range_start,
                                     format=READ_GROUP_DISPLAY_FORMAT[granularity],
-                                    tzinfo=tzinfo, locale=locale
+                                    tzinfo=tzinfo,
+                                    locale=locale,
                                 )
                             else:
                                 label = babel.dates.format_date(
                                     value,
                                     format=READ_GROUP_DISPLAY_FORMAT[granularity],
-                                    locale=locale
+                                    locale=locale,
                                 )
                             # special case weeks because babel is broken _and_
                             # ubuntu reverted a change so it's also inconsistent
-                            if granularity == 'week':
+                            if granularity == "week":
                                 year, week = date_utils.weeknumber(
                                     babel.Locale.parse(locale),
                                     value,
@@ -161,25 +163,27 @@ class BaseModel(models.AbstractModel):
                         range_start = range_start.strftime(fmt)
                         range_end = range_end.strftime(fmt)
                         row[group] = label  # TODO should put raw data
-                        row.setdefault('__range', {})[group] = {
-                            'from': range_start, 'to': range_end
+                        row.setdefault("__range", {})[group] = {
+                            "from": range_start,
+                            "to": range_end,
                         }
                         additional_domain = [
-                            '&',
-                            (field_name, '>=', range_start),
-                            (field_name, '<', range_end),
+                            "&",
+                            (field_name, ">=", range_start),
+                            (field_name, "<", range_end),
                         ]
                     elif (value is not None) and (
-                        granularity in READ_GROUP_NUMBER_GRANULARITY):
+                        granularity in READ_GROUP_NUMBER_GRANULARITY
+                    ):
                         additional_domain = [
-                            (f"{field_name}.{granularity}", '=', value)]
+                            (f"{field_name}.{granularity}", "=", value)
+                        ]
                     elif not value:
                         # Set the __range of the group containing records with an unset
                         # date/datetime field value to False.
-                        row.setdefault('__range', {})[group] = False
+                        row.setdefault("__range", {})[group] = False
 
-                row['__domain'] = expression.AND([row['__domain'], additional_domain])
-
+                row["__domain"] = expression.AND([row["__domain"], additional_domain])
 
     # @api.model
     # def _read_group_process_groupby(self, gb, query):
