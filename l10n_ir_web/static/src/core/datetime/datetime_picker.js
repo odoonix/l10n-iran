@@ -1,4 +1,5 @@
 /** @odoo-module **/
+
 import {DateTimePicker} from "@web/core/datetime/datetime_picker";
 import {patch} from "@web/core/utils/patch";
 import {localization} from "@web/core/l10n/localization";
@@ -7,17 +8,26 @@ import {isInRange, today} from "@web/core/l10n/dates";
 
 const {Info} = luxon;
 
-// Constants
 const GRID_COUNT = 10;
 const GRID_MARGIN = 1;
 const DAYS_PER_WEEK = 7;
 const WEEKS_PER_MONTH = 6;
 
-// Helpers
-const numberRange = (min, max) => [...Array(max - min)].map((_, i) => i + min);
+const numberRange = (min, max) =>
+    [...Array(max - min)].map((_, i) => i + min);
 
 const getStartOfDecade = (date) => Math.floor(date.year / 10) * 10;
 const getStartOfCentury = (date) => Math.floor(date.year / 100) * 100;
+
+/**
+ * Persian month identity key (prevents duplicates & boundary bugs)
+ */
+const getPersianMonthKey = (date) =>
+    date.toLocaleString({
+        year: "numeric",
+        month: "numeric",
+        calendar: "persian",
+    });
 
 const getJalaliValue = (date, type) => {
     if (type === "year") {
@@ -65,40 +75,37 @@ const toWeekItem = (weekDayItems) => ({
     days: weekDayItems,
 });
 
-/**
- * Jalali Precision Levels Map
- * @type {Map<PrecisionLevel, PrecisionInfo>}
- */
 const JALALI_PRECISION_MAP = new Map()
     .set("days", {
         mainTitle: _t("Select month"),
         nextTitle: _t("Next month"),
         prevTitle: _t("Previous month"),
         step: {month: 1},
+
+        /**
+         * 🔥 FIX: full Persian header (no Gregorian fallback)
+         */
         getTitle: (date, {additionalMonth}) => {
-            const titles = [
-                `${date.toLocaleString({
-                    month: "long",
-                    calendar: "persian",
-                })} ${date.toLocaleString({
-                    year: "numeric",
-                    calendar: "persian",
-                })}`,
-            ];
+            const format = {
+                year: "numeric",
+                month: "long",
+                calendar: "persian",
+            };
+
+            const titles = [date.toLocaleString(format)];
+
             if (additionalMonth) {
                 const next = date.plus({month: 1});
-                titles.push(
-                    `${next.toLocaleString({
-                        month: "long",
-                        calendar: "persian",
-                    })} ${next.toLocaleString({
-                        year: "numeric",
-                        calendar: "persian",
-                    })}`
-                );
+
+                // prevent duplicate month header
+                if (getPersianMonthKey(next) !== getPersianMonthKey(date)) {
+                    titles.push(next.toLocaleString(format));
+                }
             }
+
             return titles;
         },
+
         getItems: (
             date,
             {
@@ -111,63 +118,55 @@ const JALALI_PRECISION_MAP = new Map()
             }
         ) => {
             const startDates = [date];
+
             if (additionalMonth) {
-                startDates.push(date.plus({month: 1}));
+                const next = date.plus({month: 1});
+
+                if (getPersianMonthKey(next) !== getPersianMonthKey(date)) {
+                    startDates.push(next);
+                }
             }
 
-            return startDates.map((date, i) => {
-                // Calculate Jalali Month Range
-                const currentJalaliDay = parseInt(
-                    date.toLocaleString({
-                        day: "numeric",
-                        calendar: "persian",
-                    }),
-                    10
-                );
-                const startOfJalaliMonth = date.minus({
-                    days: currentJalaliDay - 1,
-                });
+            return startDates.map((startDate, i) => {
+                const monthKey = getPersianMonthKey(startDate);
 
-                let endOfJalaliMonth = startOfJalaliMonth.plus({days: 29});
+                // find real start of Persian month
+                let cursor = startDate;
                 while (
-                    parseInt(
-                        endOfJalaliMonth.plus({days: 1}).toLocaleString({
-                            month: "numeric",
-                            calendar: "persian",
-                        }),
-                        10
-                    ) ===
-                    parseInt(
-                        startOfJalaliMonth.toLocaleString({
-                            month: "numeric",
-                            calendar: "persian",
-                        }),
-                        10
-                    )
+                    getPersianMonthKey(cursor.minus({days: 1})) === monthKey
                 ) {
-                    endOfJalaliMonth = endOfJalaliMonth.plus({
-                        days: 1,
-                    });
+                    cursor = cursor.minus({days: 1});
                 }
-                const monthRange = [startOfJalaliMonth, endOfJalaliMonth];
 
-                // Calculate Grid Start Date (Saturday)
-                const luxonWeekday = startOfJalaliMonth.weekday;
+                const startOfMonth = cursor;
+
+                // find real end of Persian month
+                let endCursor = startOfMonth;
+                while (
+                    getPersianMonthKey(endCursor.plus({days: 1})) === monthKey
+                ) {
+                    endCursor = endCursor.plus({days: 1});
+                }
+
+                const monthRange = [startOfMonth, endCursor];
+
+                const luxonWeekday = startOfMonth.weekday;
                 const persianWeekdayIndex = ((luxonWeekday + 1) % 7) + 1;
-                const daysToSubtract = persianWeekdayIndex - 1;
-                let gridStartDate = startOfJalaliMonth.minus({
-                    days: daysToSubtract,
+
+                const gridStartDate = startOfMonth.minus({
+                    days: persianWeekdayIndex - 1,
                 });
 
-                // Generate Weeks
                 const weeks = [];
-                for (let w = 0; w < WEEKS_PER_MONTH; w++) {
+                let cursorDay = gridStartDate;
+
+                while (weeks.length < WEEKS_PER_MONTH) {
                     const weekDayItems = [];
+
                     for (let d = 0; d < DAYS_PER_WEEK; d++) {
-                        const day = gridStartDate.plus({
-                            days: d,
-                        });
+                        const day = cursorDay.plus({days: d});
                         const range = [day, day.endOf("day")];
+
                         weekDayItems.push(
                             toDateItem({
                                 isOutOfRange: !isInRange(day, monthRange),
@@ -180,13 +179,15 @@ const JALALI_PRECISION_MAP = new Map()
                             })
                         );
                     }
-                    gridStartDate = gridStartDate.plus({
-                        days: DAYS_PER_WEEK,
-                    });
+
                     weeks.push(toWeekItem(weekDayItems));
+                    cursorDay = cursorDay.plus({days: DAYS_PER_WEEK});
+
+                    if (cursorDay > endCursor && weeks.length >= 4) {
+                        break;
+                    }
                 }
 
-                // Generate Days of Week Labels
                 const daysOfWeek = weeks[0].days.map((d) => [
                     d.range[0].weekdayShort,
                     d.range[0].weekdayLong,
@@ -201,7 +202,7 @@ const JALALI_PRECISION_MAP = new Map()
 
                 return {
                     id: `month__${i}`,
-                    number: monthRange[0].month,
+                    number: startOfMonth.month,
                     daysOfWeek,
                     weeks,
                 };
@@ -213,27 +214,36 @@ const JALALI_PRECISION_MAP = new Map()
         nextTitle: _t("Next year"),
         prevTitle: _t("Previous year"),
         step: {year: 1},
+
+        /**
+         * 🔥 FIX: Jalali year header (no Gregorian fallback possible)
+         */
         getTitle: (date) =>
-            String(
-                date.toLocaleString({
-                    year: "numeric",
-                    calendar: "persian",
-                })
-            ),
+            date.toLocaleString({
+                year: "numeric",
+                calendar: "persian",
+            }),
+
         getItems: (date, {maxDate, minDate}) => {
-            const currentJalaliMonth = parseInt(
+            const currentMonth = parseInt(
                 date.toLocaleString({
                     month: "numeric",
                     calendar: "persian",
                 }),
                 10
             );
-            const startOfJalaliYear = date
-                .minus({months: currentJalaliMonth - 1})
+
+            const startOfYear = date
+                .minus({months: currentMonth - 1})
                 .startOf("month");
+
             return numberRange(0, 12).map((i) => {
-                const startOfMonth = startOfJalaliYear.plus({months: i});
-                const range = [startOfMonth, startOfMonth.endOf("month")];
+                const startOfMonth = startOfYear.plus({months: i});
+                const range = [
+                    startOfMonth,
+                    startOfMonth.endOf("month"),
+                ];
+
                 return toDateItem({
                     isValid: isInRange(range, [minDate, maxDate]),
                     label: "monthShort",
@@ -247,26 +257,30 @@ const JALALI_PRECISION_MAP = new Map()
         nextTitle: _t("Next decade"),
         prevTitle: _t("Previous decade"),
         step: {year: 10},
+
         getTitle: (date) => {
             const start = getStartOfDecade(date);
             return `${start - 1} - ${start + 10}`;
         },
+
         getItems: (date, {maxDate, minDate}) => {
-            const startOfDecade = date
+            const start = date
                 .startOf("year")
                 .set({year: getStartOfDecade(date)});
-            return numberRange(-GRID_MARGIN, GRID_COUNT + GRID_MARGIN).map((i) => {
-                const startOfYear = startOfDecade.plus({
-                    year: i,
-                });
-                const range = [startOfYear, startOfYear.endOf("year")];
-                return toDateItem({
-                    isOutOfRange: i < 0 || i >= GRID_COUNT,
-                    isValid: isInRange(range, [minDate, maxDate]),
-                    label: "year",
-                    range,
-                });
-            });
+
+            return numberRange(-GRID_MARGIN, GRID_COUNT + GRID_MARGIN).map(
+                (i) => {
+                    const year = start.plus({year: i});
+                    const range = [year, year.endOf("year")];
+
+                    return toDateItem({
+                        isOutOfRange: i < 0 || i >= GRID_COUNT,
+                        isValid: isInRange(range, [minDate, maxDate]),
+                        label: "year",
+                        range,
+                    });
+                }
+            );
         },
     })
     .set("decades", {
@@ -274,55 +288,52 @@ const JALALI_PRECISION_MAP = new Map()
         nextTitle: _t("Next century"),
         prevTitle: _t("Previous century"),
         step: {year: 100},
+
         getTitle: (date) => {
             const start = getStartOfCentury(date);
             return `${start - 10} - ${start + 100}`;
         },
+
         getItems: (date, {maxDate, minDate}) => {
-            const startOfCentury = date
+            const start = date
                 .startOf("year")
                 .set({year: getStartOfCentury(date)});
-            return numberRange(-GRID_MARGIN, GRID_COUNT + GRID_MARGIN).map((i) => {
-                const startOfDecade = startOfCentury.plus({
-                    year: i * 10,
-                });
-                const range = [
-                    startOfDecade,
-                    startOfDecade.plus({
-                        year: 10,
-                        millisecond: -1,
-                    }),
-                ];
-                return toDateItem({
-                    label: "year",
-                    isOutOfRange: i < 0 || i >= GRID_COUNT,
-                    isValid: isInRange(range, [minDate, maxDate]),
-                    range,
-                });
-            });
+
+            return numberRange(-GRID_MARGIN, GRID_COUNT + GRID_MARGIN).map(
+                (i) => {
+                    const decade = start.plus({year: i * 10});
+                    const range = [
+                        decade,
+                        decade.plus({year: 10, millisecond: -1}),
+                    ];
+
+                    return toDateItem({
+                        label: "year",
+                        isOutOfRange: i < 0 || i >= GRID_COUNT,
+                        isValid: isInRange(range, [minDate, maxDate]),
+                        range,
+                    });
+                }
+            );
         },
     });
 
 patch(DateTimePicker.prototype, {
-    setup() {
-        super.setup();
-    },
-
     get titles() {
         if (localization.code !== "fa_IR") {
             return super.titles;
         }
+
         const {focusDate} = this.state;
         if (!focusDate) return [];
-        const monthName = focusDate.toLocaleString({
-            month: "long",
-            calendar: "persian",
-        });
-        const year = focusDate.toLocaleString({
-            year: "numeric",
-            calendar: "persian",
-        });
-        return [`${monthName} ${year}`];
+
+        return [
+            focusDate.toLocaleString({
+                month: "long",
+                year: "numeric",
+                calendar: "persian",
+            }),
+        ];
     },
 
     get activePrecisionLevel() {
@@ -330,51 +341,5 @@ patch(DateTimePicker.prototype, {
             return super.activePrecisionLevel;
         }
         return JALALI_PRECISION_MAP.get(this.state.precision);
-    },
-
-    /**
-     * Override adjustFocus to prevent jumping to
-     * previous month when selecting 1st of Jalali month.
-     */
-    adjustFocus(values, focusedDateIndex) {
-        if (localization.code !== "fa_IR") {
-            return super.adjustFocus(values, focusedDateIndex);
-        }
-
-        if (!this.shouldAdjustFocusDate && this.state.focusDate) {
-            return;
-        }
-
-        let dateToFocus =
-            values[focusedDateIndex] ||
-            values[focusedDateIndex === 1 ? 0 : 1] ||
-            today();
-
-        if (
-            this.additionalMonth &&
-            focusedDateIndex === 1 &&
-            values[0] &&
-            values[1] &&
-            values[0].month !== values[1].month
-        ) {
-            dateToFocus = dateToFocus.minus({month: 1});
-        }
-
-        this.shouldAdjustFocusDate = false;
-
-        // Jalali Logic: Focus on the start of the
-        // Jalali month to prevent UI jumps
-        const currentJalaliDay = parseInt(
-            dateToFocus.toLocaleString({
-                day: "numeric",
-                calendar: "persian",
-            }),
-            10
-        );
-        const startOfJalaliMonth = dateToFocus.minus({
-            days: currentJalaliDay - 1,
-        });
-
-        this.state.focusDate = this.clamp(startOfJalaliMonth);
     },
 });
