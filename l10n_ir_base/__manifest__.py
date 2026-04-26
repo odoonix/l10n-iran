@@ -1,3 +1,4 @@
+# pylint: disable=W0104
 {
     "name": "Odoo Base Localization for Iran",
     "version": "18.0.1.0.0",

@@ -26,12 +26,10 @@ const jDT = (v) =>
         minute: "2-digit",
     }) || "";
 
-f.add("date", (v, o) =>
-    localization.code === "fa_IR" ? jDate(v) : origDate(v, o),
-{force: true});
+f.add("date", (v, o) => (localization.code === "fa_IR" ? jDate(v) : origDate(v, o)), {
+    force: true,
+});
 
-f.add("datetime", (v, o) =>
-    localization.code === "fa_IR" ? jDT(v) : origDT(v, o),
-{force: true});
-
-
+f.add("datetime", (v, o) => (localization.code === "fa_IR" ? jDT(v) : origDT(v, o)), {
+    force: true,
+});

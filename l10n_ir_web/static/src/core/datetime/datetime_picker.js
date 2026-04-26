@@ -13,8 +13,7 @@ const GRID_MARGIN = 1;
 const DAYS_PER_WEEK = 7;
 const WEEKS_PER_MONTH = 6;
 
-const numberRange = (min, max) =>
-    [...Array(max - min)].map((_, i) => i + min);
+const numberRange = (min, max) => [...Array(max - min)].map((_, i) => i + min);
 
 const getStartOfDecade = (date) => Math.floor(date.year / 10) * 10;
 const getStartOfCentury = (date) => Math.floor(date.year / 100) * 100;
@@ -132,9 +131,7 @@ const JALALI_PRECISION_MAP = new Map()
 
                 // find real start of Persian month
                 let cursor = startDate;
-                while (
-                    getPersianMonthKey(cursor.minus({days: 1})) === monthKey
-                ) {
+                while (getPersianMonthKey(cursor.minus({days: 1})) === monthKey) {
                     cursor = cursor.minus({days: 1});
                 }
 
@@ -142,9 +139,7 @@ const JALALI_PRECISION_MAP = new Map()
 
                 // find real end of Persian month
                 let endCursor = startOfMonth;
-                while (
-                    getPersianMonthKey(endCursor.plus({days: 1})) === monthKey
-                ) {
+                while (getPersianMonthKey(endCursor.plus({days: 1})) === monthKey) {
                     endCursor = endCursor.plus({days: 1});
                 }
 
@@ -233,16 +228,11 @@ const JALALI_PRECISION_MAP = new Map()
                 10
             );
 
-            const startOfYear = date
-                .minus({months: currentMonth - 1})
-                .startOf("month");
+            const startOfYear = date.minus({months: currentMonth - 1}).startOf("month");
 
             return numberRange(0, 12).map((i) => {
                 const startOfMonth = startOfYear.plus({months: i});
-                const range = [
-                    startOfMonth,
-                    startOfMonth.endOf("month"),
-                ];
+                const range = [startOfMonth, startOfMonth.endOf("month")];
 
                 return toDateItem({
                     isValid: isInRange(range, [minDate, maxDate]),
@@ -264,23 +254,19 @@ const JALALI_PRECISION_MAP = new Map()
         },
 
         getItems: (date, {maxDate, minDate}) => {
-            const start = date
-                .startOf("year")
-                .set({year: getStartOfDecade(date)});
+            const start = date.startOf("year").set({year: getStartOfDecade(date)});
 
-            return numberRange(-GRID_MARGIN, GRID_COUNT + GRID_MARGIN).map(
-                (i) => {
-                    const year = start.plus({year: i});
-                    const range = [year, year.endOf("year")];
+            return numberRange(-GRID_MARGIN, GRID_COUNT + GRID_MARGIN).map((i) => {
+                const year = start.plus({year: i});
+                const range = [year, year.endOf("year")];
 
-                    return toDateItem({
-                        isOutOfRange: i < 0 || i >= GRID_COUNT,
-                        isValid: isInRange(range, [minDate, maxDate]),
-                        label: "year",
-                        range,
-                    });
-                }
-            );
+                return toDateItem({
+                    isOutOfRange: i < 0 || i >= GRID_COUNT,
+                    isValid: isInRange(range, [minDate, maxDate]),
+                    label: "year",
+                    range,
+                });
+            });
         },
     })
     .set("decades", {
@@ -295,26 +281,19 @@ const JALALI_PRECISION_MAP = new Map()
         },
 
         getItems: (date, {maxDate, minDate}) => {
-            const start = date
-                .startOf("year")
-                .set({year: getStartOfCentury(date)});
+            const start = date.startOf("year").set({year: getStartOfCentury(date)});
 
-            return numberRange(-GRID_MARGIN, GRID_COUNT + GRID_MARGIN).map(
-                (i) => {
-                    const decade = start.plus({year: i * 10});
-                    const range = [
-                        decade,
-                        decade.plus({year: 10, millisecond: -1}),
-                    ];
+            return numberRange(-GRID_MARGIN, GRID_COUNT + GRID_MARGIN).map((i) => {
+                const decade = start.plus({year: i * 10});
+                const range = [decade, decade.plus({year: 10, millisecond: -1})];
 
-                    return toDateItem({
-                        label: "year",
-                        isOutOfRange: i < 0 || i >= GRID_COUNT,
-                        isValid: isInRange(range, [minDate, maxDate]),
-                        range,
-                    });
-                }
-            );
+                return toDateItem({
+                    label: "year",
+                    isOutOfRange: i < 0 || i >= GRID_COUNT,
+                    isValid: isInRange(range, [minDate, maxDate]),
+                    range,
+                });
+            });
         },
     });
 

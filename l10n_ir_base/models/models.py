@@ -1,3 +1,4 @@
+# ruff: noqa: C901
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import datetime
@@ -113,7 +114,10 @@ class BaseModel(models.AbstractModel):
                     additional_domain = [(field_name, "=", value)]
 
                 if field.type in ("date", "datetime"):
-                    if value and isinstance(value, (datetime.date, datetime.datetime)):
+                    if value and (
+                        isinstance(value, datetime.datetime)
+                        or isinstance(value, datetime.date)
+                    ):
                         range_start = value
                         range_end = value + interval
                         if field.type == "datetime":

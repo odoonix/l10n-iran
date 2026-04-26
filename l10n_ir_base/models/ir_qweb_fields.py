@@ -10,9 +10,9 @@ from odoo.tools.misc import get_lang
 
 DEFAULT_SERVER_DATE_FORMAT = "%Y-%m-%d"
 DEFAULT_SERVER_TIME_FORMAT = "%H:%M:%S"
-DEFAULT_SERVER_DATETIME_FORMAT = "%s %s" % (
-    DEFAULT_SERVER_DATE_FORMAT,
-    DEFAULT_SERVER_TIME_FORMAT,
+
+DEFAULT_SERVER_DATETIME_FORMAT = (
+    f"{DEFAULT_SERVER_DATE_FORMAT} {DEFAULT_SERVER_TIME_FORMAT}"
 )
 
 DATE_LENGTH = len(datetime.date.today().strftime(DEFAULT_SERVER_DATE_FORMAT))
@@ -202,13 +202,12 @@ class DateTimeConverter(models.AbstractModel):
             pattern = options["format"]
         else:
             if options.get("time_only"):
-                strftime_pattern = "%s" % (lang.time_format)
+                strftime_pattern = f"{lang.time_format}"
             elif options.get("date_only"):
-                strftime_pattern = "%s" % (lang.date_format)
+                strftime_pattern = f"{lang.date_format}"
             else:
-                strftime_pattern = "%s %s" % (lang.date_format, lang.time_format)
+                strftime_pattern = f"{lang.date_format} {lang.time_format}"
 
-            # pattern = posix_to_ldml(strftime_pattern, locale=locale)
             pattern = strftime_pattern
 
         if options.get("hide_seconds"):
