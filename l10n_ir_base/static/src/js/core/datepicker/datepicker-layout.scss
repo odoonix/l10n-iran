@@ -1,0 +1,612 @@
+%date-item {
+    @extend %small-curve;
+    @extend %interactive-item;
+    font: $date-item-font;
+    background-color: $date-item-bg;
+    color: $date-item-color;
+    border: $date-item-border;
+    text-shadow: $date-item-text-shadow;
+}
+
+%date-item-disable {
+    @extend %interactive-item;
+    background-color: $date-item-disable-bg;
+    color: $date-item-disable-color;
+    border: $date-item-disable-border;
+    text-shadow: $date-item-disable-text-shadow;
+    cursor: default;
+    @extend %reset-curve;
+}
+
+%date-item-today {
+    background-color: $date-item-today-bg;
+    color: $date-item-today-color;
+    border: $date-item-today-border;
+    text-shadow: $date-item-today-text-shadow;
+}
+
+%date-item-numb {
+    background-color: $date-item-numb-bg;
+    color: $date-item-numb-color;
+    border: $date-item-numb-border;
+    text-shadow: $date-item-numb-text-shadow;
+}
+
+%date-item-selected {
+    background-color: $date-item-selected-bg;
+    color: $date-item-selected-color;
+    border: $date-item-selected-border;
+    text-shadow: $date-item-selected-text-shadow;
+}
+
+%date-item-hover {
+    background-color: $date-item-hover-bg;
+    color: $date-item-hover-color;
+    border: $date-item-hover-border;
+    text-shadow: $date-item-hover-text-shadow;
+}
+
+//--------------------------------------------------------------------------
+//  '../module/plot-area';
+//--------------------------------------------------------------------------
+.datepicker-container {
+    display: block;
+    z-index: 100000;
+
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.27);
+    /*rtl:ignore*/
+    direction: ltr;
+
+    &.pwt-hide {
+        display: none;
+    }
+}
+
+.datepicker-plot-area {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    box-sizing: border-box;
+    overflow: hidden;
+    min-height: 70px;
+    display: block;
+    width: 200px;
+    min-width: 200px;
+    padding: 3px;
+    position: absolute;
+    font: $main-font;
+    border: $plot-area-border;
+    background-color: $plot-area-bg;
+    @extend %big-curve;
+    @extend %main-box-shadow;
+    @extend %unselectable;
+
+    &.datepicker-state-only-time {
+        padding: 0;
+    }
+
+    table,
+    th,
+    td {
+        border: 0;
+        background: none;
+    }
+
+    * {
+        text-align: $global-text-align;
+        color: $global-text-color;
+    }
+
+    .datepicker-day-view,
+    .datepicker-month-view,
+    .datepicker-year-view {
+        display: block;
+        width: 100%;
+        /*rtl:ignore*/
+        float: left;
+        min-height: 200px;
+        margin: 0;
+    }
+}
+
+.datepicker-plot-area-inline-view {
+    display: block;
+    width: 100%;
+    position: static;
+    /*rtl:ignore*/
+    float: left;
+}
+
+//--------------------------------------------------------------------------
+//  '../module/timepicker';
+//
+// NOTE:
+//--------------------------------------------------------------------------
+.datepicker-plot-area {
+    .datepicker-time-view {
+        /*rtl:begin:ignore*/
+        display: block;
+        /*rtl:ignore*/
+        direction: ltr !important;
+        /*rtl:ignore*/
+        float: left !important;
+        width: 100%;
+        padding: $grid-gutter;
+        //margin: 3px -5px;
+        background: $timepicker-bg;
+        border-top: $timepicker-border;
+        /*rtl:end:ignore*/
+
+        & > .time-segment {
+            /*rtl:begin:ignore*/
+            display: block;
+            width: 22%;
+            float: left !important;
+            overflow: hidden;
+            /*rtl:end:ignore*/
+            @extend %interactive-item;
+            @extend %big-curve;
+
+            &:hover {
+                .down-btn,
+                .up-btn {
+                    font-weight: $strong-font;
+                }
+            }
+        }
+
+        & .divider {
+            display: block;
+            width: 3%;
+            height: 60px;
+            line-height: 60px;
+            /*rtl:ignore*/
+            float: left;
+            overflow: hidden;
+            font: $timepicker-segment-divider-font;
+
+            span {
+                height: 60px;
+                line-height: 60px;
+            }
+        }
+
+        .down-btn,
+        .up-btn {
+            display: block;
+            /*rtl:ignore*/
+            float: left;
+            width: 100%;
+            margin: 0;
+            height: 20px;
+            line-height: 22px;
+            color: $timepicker-btn-color;
+            @extend %top-big-curve;
+            @extend %interactive-item;
+            @extend %animation;
+
+            &:hover {
+                background-color: $button-bg-hover;
+                color: $timepicker-btn-hover-color;
+            }
+        }
+
+        .down-btn {
+            @extend %bottom-big-curve;
+        }
+
+        input {
+            display: block;
+            width: 90%;
+            margin: 0 5%;
+            height: 20px;
+            padding: 0;
+            outline: none;
+            @extend %interactive-item;
+            border: $timepicker-input-border;
+            background: transparent;
+        }
+    }
+
+    &.datepicker-state-only-time {
+        .datepicker-time-view {
+            padding: 0 $grid-gutter;
+            margin: 0;
+
+            & > .time-segment,
+            & > .divider {
+                padding: $grid-gutter 0;
+            }
+        }
+    }
+
+    &.datepicker-state-no-meridian {
+        .datepicker-time-view {
+            & > .time-segment {
+                width: 31.33%;
+            }
+
+            & > .meridian-divider {
+                display: none;
+            }
+        }
+    }
+
+    &.datepicker-state-no-second {
+        .datepicker-time-view {
+            & > .time-segment {
+                width: 31.33%;
+            }
+
+            & > .second-divider {
+                display: none;
+            }
+        }
+    }
+
+    &.datepicker-state-no-meridian.datepicker-state-no-second {
+        .datepicker-time-view {
+            & > .time-segment {
+                width: 48%;
+            }
+
+            & > .second-divider,
+            & > .meridian-divider {
+                display: none;
+            }
+        }
+    }
+}
+
+//--------------------------------------------------------------------------
+//  '../module/daypicker';
+//--------------------------------------------------------------------------
+
+.datepicker-plot-area {
+    .datepicker-day-view {
+        .table-days {
+            width: 100%;
+            /*rtl:ignore*/
+            float: left;
+            /*rtl:ignore*/
+            direction: rtl;
+
+            td {
+                width: 14.2%;
+                height: 26px;
+                padding: 0;
+                margin: 0;
+                position: relative;
+
+                &.disabled span {
+                    @extend %date-item-disable;
+                }
+
+                &.selected span {
+                    @extend %date-item-selected;
+                }
+
+                &.selected span &:hover {
+                    @extend %date-item-hover;
+                }
+
+                &.today span {
+                    @extend %date-item-today;
+                }
+
+                .alter-calendar-day {
+                    font-style: normal;
+                    position: absolute;
+                    font-size: 8.5px;
+                    bottom: 0;
+                    right: 2px;
+                    color: $alter-calendar-hint-color;
+                }
+
+                span {
+                    display: block;
+                    width: 100%;
+                    height: 26px;
+                    line-height: 26px;
+                    padding: 0;
+                    margin: 0;
+                    @extend %date-item;
+
+                    &.other-month {
+                        @extend %date-item-numb;
+                    }
+
+                    &:hover {
+                        @extend %date-item-hover;
+                    }
+                }
+            }
+        }
+
+        .month-grid-box {
+            display: block;
+            width: 100%;
+            /*rtl:ignore*/
+            float: right;
+            min-height: 180px;
+            margin: 8px 0;
+
+            .header {
+                display: block;
+                width: 100%;
+                /*rtl:ignore*/
+                float: left;
+                padding-bottom: 8px;
+
+                .header-row {
+                    display: block;
+                    width: 100%;
+                    height: 25px;
+                    /*rtl:ignore*/
+                    float: left;
+                }
+
+                .header-row-cell {
+                    display: block;
+                    width: 14.2%;
+                    height: 25px;
+                    /*rtl:ignore*/
+                    float: right;
+                    line-height: 25px;
+                    font: 11px;
+                    font-weight: $strong-font;
+                    color: $dark;
+                }
+            }
+        }
+    }
+}
+
+//--------------------------------------------------------------------------
+//  '../module/month-year-picker';
+//--------------------------------------------------------------------------
+.datepicker-plot-area {
+    .datepicker-year-view,
+    .datepicker-month-view {
+        padding-top: ($grid-gutter * 2);
+    }
+
+    // sass-lint:disable force-element-nesting
+    .datepicker-year-view .year-item,
+    .datepicker-month-view .month-item {
+        display: block;
+        width: 33.333333%;
+        margin: 2px 0 0;
+        /*rtl:ignore*/
+        float: right;
+        height: 42px;
+        line-height: 42px;
+        @extend %date-item;
+
+        &:hover {
+            @extend %date-item-hover;
+        }
+
+        &.selected {
+            @extend %date-item-selected;
+        }
+    }
+
+    .datepicker-year-view .year-item-disable,
+    .datepicker-month-view .month-item-disable {
+        @extend %date-item-disable;
+    }
+
+    // sass-lint:enable force-element-nesting
+}
+
+//--------------------------------------------------------------------------
+//  '../module/navigator';
+//--------------------------------------------------------------------------
+.datepicker-plot-area {
+    .datepicker-navigator {
+        display: block;
+        width: 100%;
+        /*rtl:ignore*/
+        float: left;
+
+        .pwt-btn-next,
+        .pwt-btn-switch,
+        .pwt-btn-prev {
+            display: block;
+            /*rtl:ignore*/
+            float: left;
+            height: 28px;
+            line-height: 28px;
+            font-weight: $strong-font;
+            background-color: $button-bg;
+            color: $button-text-color;
+            @extend %interactive-item;
+            @extend %small-curve;
+
+            &:hover {
+                background-color: $button-bg-hover;
+            }
+        }
+
+        .pwt-btn-next {
+            display: block;
+            width: 15%;
+            /*rtl:ignore*/
+            float: left;
+        }
+
+        .pwt-btn-switch {
+            display: block;
+            width: 66%;
+            margin: 0 2%;
+            /*rtl:ignore*/
+            float: left;
+        }
+
+        .pwt-btn-prev {
+            display: block;
+            width: 15%;
+            /*rtl:ignore*/
+            float: left;
+        }
+    }
+}
+
+//--------------------------------------------------------------------------
+//  '../module/toolbox';
+//--------------------------------------------------------------------------
+.datepicker-plot-area {
+    .toolbox {
+        display: block;
+        /*rtl:ignore*/
+        float: left;
+        width: 100%;
+        margin-top: $grid-gutter;
+
+        .pwt-btn-submit,
+        .pwt-btn-calendar,
+        .pwt-btn-today,
+        .pwt-btn-exit {
+            @extend %interactive-item;
+            background-color: $button-bg;
+            /*rtl:ignore*/
+            float: right;
+            display: block;
+            font-weight: $strong-font;
+            font-size: 11px;
+            height: 24px;
+            line-height: 24px;
+            white-space: nowrap;
+            margin: 0 auto;
+            margin-left: $grid-gutter;
+            padding: 0 $grid-gutter;
+            min-width: 50px;
+
+            &:hover {
+                background-color: $button-bg-hover;
+            }
+        }
+    }
+}
+
+//--------------------------------------------------------------------------
+//  '../module/mobile';
+//--------------------------------------------------------------------------
+.datepicker-container.pwt-mobile-view {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow: hidden;
+    transition: all 1s;
+
+    &.pwt-hide {
+        top: 100vh;
+        height: 0;
+    }
+
+    .datepicker-plot-area.datepicker-state-only-time {
+        .pwt-btn-submit {
+            color: $white;
+            background: $gray;
+        }
+    }
+
+    //border: 10px solid red;
+    .datepicker-plot-area {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        .table-days {
+            td,
+            td span {
+                height: 44px;
+                line-height: 44px;
+                font-size: 14px;
+            }
+        }
+
+        .datepicker-year-view .year-item,
+        .datepicker-month-view .month-item {
+            height: 70px;
+            line-height: 70px;
+        }
+
+        [class*="pwt-btn"] {
+            height: 48px;
+            line-height: 48px;
+        }
+
+        .pwt-btn-today {
+            /*rtl:ignore*/
+            float: left;
+        }
+
+        &.datepicker-state-only-time {
+            background: $transparent-bg;
+            border: 0;
+            padding-top: 60%;
+
+            .pwt-btn-submit {
+                margin-right: $grid-gutter;
+            }
+
+            .datepicker-time-view {
+                input {
+                    height: 40px;
+                    line-height: 40px;
+                    font-size: 24px;
+                    margin: $grid-gutter 0;
+                }
+
+                .divider,
+                .divider span {
+                    font-size: 16px;
+                    display: block;
+                    height: 48 * 3px;
+                    line-height: 48 * 3px;
+                }
+
+                .down-btn,
+                .up-btn {
+                    height: 48px;
+                    line-height: 48px;
+                }
+            }
+        }
+    }
+
+    .datepicker-time-view {
+        input {
+            height: 32px;
+            line-height: 34px;
+            font-size: 18px;
+        }
+
+        .divider,
+        .divider span {
+            height: 40 * 3px;
+            line-height: 40 * 3px;
+        }
+
+        .down-btn,
+        .up-btn {
+            height: 40px;
+            line-height: 40px;
+        }
+    }
+}

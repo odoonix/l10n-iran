@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="l10n_ir_web.DateRangeField" owl="1">
+        <t t-if="props.readonly">
+            <t t-out="formattedValue" />
+        </t>
+        <t t-else="">
+            <input
+                class="o_input"
+                style="width:100% !important"
+                t-ref="root"
+                type="text"
+                t-att-id="props.id"
+                t-att-value="formattedValue"
+                t-att-placeholder="props.placeholder"
+                t-on-change="onChangeInput"
+            />
+        </t>
+    </t>
+
+</templates>
