@@ -12,14 +12,90 @@ const GRID_COUNT = 10;
 const GRID_MARGIN = 1;
 const DAYS_PER_WEEK = 7;
 const WEEKS_PER_MONTH = 6;
+const JALALI_NUMERIC_LOCALE = "en-u-ca-persian-nu-latn";
+const JALALI_PARTS_FORMATTER = new Intl.DateTimeFormat(
+    JALALI_NUMERIC_LOCALE, {
+        calendar: "persian",
+        numberingSystem: "latn",
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+    }
+);
 
 // Helpers
-const numberRange = (min, max) =>
-    [...Array(max - min)].map((_, i) => i + min);
-const getStartOfDecade = (date) =>
-    Math.floor(date.year / 10) * 10;
-const getStartOfCentury = (date) =>
-    Math.floor(date.year / 100) * 100;
+const numberRange = (min, max) => [...Array(max - min)].map((_, i) => i + min);
+
+const getJalaliParts = (date) => {
+    const parts = {};
+    for (const part of JALALI_PARTS_FORMATTER.formatToParts(date.toJSDate())) {
+        if (part.type === "year" || part.type === "month" || part.type === "day") {
+            parts[part.type] = Number(part.value);
+        }
+    }
+    return parts;
+};
+
+const getJalaliYear = (date) => getJalaliParts(date).year;
+const getJalaliMonth = (date) => getJalaliParts(date).month;
+const getJalaliDay = (date) => getJalaliParts(date).day;
+const isSameJalaliMonth = (left, right) =>
+    getJalaliYear(left) === getJalaliYear(right) &&
+    getJalaliMonth(left) === getJalaliMonth(right);
+
+const getStartOfJalaliMonth = (date) =>
+    date.startOf("day").minus({ days: getJalaliDay(date) - 1 });
+
+const getEndOfJalaliMonth = (date) => {
+    const startOfJalaliMonth = getStartOfJalaliMonth(date);
+    let endOfJalaliMonth = startOfJalaliMonth.plus({ days: 29 });
+    while (isSameJalaliMonth(endOfJalaliMonth.plus({ days: 1 }), startOfJalaliMonth)) {
+        endOfJalaliMonth = endOfJalaliMonth.plus({ days: 1 });
+    }
+    return endOfJalaliMonth;
+};
+
+const getStartOfNextJalaliMonth = (date) =>
+    getEndOfJalaliMonth(date).plus({ days: 1 }).startOf("day");
+
+const getStartOfPreviousJalaliMonth = (date) =>
+    getStartOfJalaliMonth(date).minus({ days: 1 }).startOf("day");
+
+const addJalaliMonths = (date, count) => {
+    let cursor = getStartOfJalaliMonth(date);
+    const stepCount = Math.abs(count);
+    for (let i = 0; i < stepCount; i++) {
+        cursor =
+            count >= 0 ?
+            getStartOfNextJalaliMonth(cursor) :
+            getStartOfJalaliMonth(getStartOfPreviousJalaliMonth(cursor));
+    }
+    return cursor;
+};
+
+const getStartOfJalaliYear = (date) => addJalaliMonths(date, -(getJalaliMonth(date) - 1));
+const addJalaliYears = (date, count) => addJalaliMonths(getStartOfJalaliYear(date), count * 12);
+
+const getStartOfJalaliDecade = (date) =>
+    addJalaliYears(date, -(getJalaliYear(date) % 10));
+
+const getStartOfJalaliCentury = (date) =>
+    addJalaliYears(date, -(getJalaliYear(date) % 100));
+
+const shiftJalaliFocusDate = (date, precision, direction) => {
+    switch (precision) {
+        case "days":
+            return addJalaliMonths(date, direction);
+        case "months":
+            return addJalaliYears(date, direction);
+        case "years":
+            return addJalaliYears(date, direction * 10);
+        case "decades":
+            return addJalaliYears(date, direction * 100);
+        default:
+            return date;
+    }
+};
 
 const getJalaliValue = (date, type) => {
     if (type === "year") {
@@ -89,7 +165,7 @@ const JALALI_PRECISION_MAP = new Map()
                 })}`,
             ];
             if (additionalMonth) {
-                const next = date.plus({ month: 1 });
+                const next = addJalaliMonths(date, 1);
                 titles.push(
                     `${next.toLocaleString({
                         month: "long",
@@ -103,8 +179,7 @@ const JALALI_PRECISION_MAP = new Map()
             return titles;
         },
         getItems: (
-            date,
-            {
+            date, {
                 additionalMonth = false,
                 maxDate,
                 minDate,
@@ -115,44 +190,11 @@ const JALALI_PRECISION_MAP = new Map()
         ) => {
             const startDates = [date];
             if (additionalMonth) {
-                startDates.push(date.plus({ month: 1 }));
+                startDates.push(addJalaliMonths(date, 1));
             }
             return startDates.map((date, i) => {
-                // Calculate Jalali Month Range
-                const currentJalaliDay = parseInt(
-                    date.toLocaleString({
-                        day: "numeric",
-                        calendar: "persian",
-                    }),
-                    10
-                );
-                const startOfJalaliMonth = date.minus({
-                    days: currentJalaliDay - 1,
-                });
-                let endOfJalaliMonth =
-                    startOfJalaliMonth.plus({ days: 29 });
-                while (
-                    parseInt(
-                        endOfJalaliMonth
-                            .plus({ days: 1 })
-                            .toLocaleString({
-                                month: "numeric",
-                                calendar: "persian",
-                            }),
-                        10
-                    ) ===
-                    parseInt(
-                        startOfJalaliMonth.toLocaleString({
-                            month: "numeric",
-                            calendar: "persian",
-                        }),
-                        10
-                    )
-                ) {
-                    endOfJalaliMonth = endOfJalaliMonth.plus({
-                        days: 1,
-                    });
-                }
+                const startOfJalaliMonth = getStartOfJalaliMonth(date);
+                const endOfJalaliMonth = getEndOfJalaliMonth(date);
                 const monthRange = [
                     startOfJalaliMonth,
                     endOfJalaliMonth,
@@ -180,16 +222,14 @@ const JALALI_PRECISION_MAP = new Map()
                                     day,
                                     monthRange
                                 ),
-                                isValid:
-                                    isInRange(range, [
+                                isValid: isInRange(range, [
                                         minDate,
                                         maxDate,
                                     ]) &&
-                                    isDateValid?.(day),
+                                    isDateValid ? .(day),
                                 label: "day",
                                 range,
-                                extraClass:
-                                    dayCellClass?.(day) ||
+                                extraClass: dayCellClass ? .(day) ||
                                     "",
                             })
                         );
@@ -216,7 +256,7 @@ const JALALI_PRECISION_MAP = new Map()
                 }
                 return {
                     id: `month__${i}`,
-                    number: monthRange[0].month,
+                    number: getJalaliMonth(monthRange[0]),
                     daysOfWeek,
                     weeks,
                 };
@@ -236,22 +276,17 @@ const JALALI_PRECISION_MAP = new Map()
                 })
             ),
         getItems: (date, { maxDate, minDate } = {}) => {
-            const currentJalaliMonth = parseInt(
-                date.toLocaleString({
-                    month: "numeric",
-                    calendar: "persian",
-                }),
-                10
-            );
-            const startOfJalaliYear = date
-                .minus({ months: currentJalaliMonth - 1 })
-                .startOf("month");
+            const startOfJalaliYear = getStartOfJalaliYear(date);
             return numberRange(0, 12).map((i) => {
-                const startOfMonth =
-                    startOfJalaliYear.plus({ months: i });
+                const startOfMonth = addJalaliMonths(
+                    startOfJalaliYear,
+                    i
+                );
                 const range = [
                     startOfMonth,
-                    startOfMonth.endOf("month"),
+                    getStartOfNextJalaliMonth(startOfMonth).minus({
+                        millisecond: 1,
+                    }),
                 ];
                 return toDateItem({
                     isValid: isInRange(range, [
@@ -270,27 +305,26 @@ const JALALI_PRECISION_MAP = new Map()
         prevTitle: _t("Previous decade"),
         step: { year: 10 },
         getTitle: (date) => {
-            const start = getStartOfDecade(date);
+            const start = getJalaliYear(getStartOfJalaliDecade(date));
             return `${start - 1} - ${start + 10}`;
         },
         getItems: (date, { maxDate, minDate } = {}) => {
-            const startOfDecade = date
-                .startOf("year")
-                .set({ year: getStartOfDecade(date) });
-            return numberRange(
-                -GRID_MARGIN,
+            const startOfDecade = getStartOfJalaliDecade(date);
+            return numberRange(-GRID_MARGIN,
                 GRID_COUNT + GRID_MARGIN
             ).map((i) => {
-                const startOfYear = startOfDecade.plus({
-                    year: i,
-                });
+                const startOfYear = addJalaliYears(
+                    startOfDecade,
+                    i
+                );
                 const range = [
                     startOfYear,
-                    startOfYear.endOf("year"),
+                    addJalaliYears(startOfYear, 1).minus({
+                        millisecond: 1,
+                    }),
                 ];
                 return toDateItem({
-                    isOutOfRange:
-                        i < 0 || i >= GRID_COUNT,
+                    isOutOfRange: i < 0 || i >= GRID_COUNT,
                     isValid: isInRange(range, [
                         minDate,
                         maxDate,
@@ -307,31 +341,27 @@ const JALALI_PRECISION_MAP = new Map()
         prevTitle: _t("Previous century"),
         step: { year: 100 },
         getTitle: (date) => {
-            const start = getStartOfCentury(date);
+            const start = getJalaliYear(getStartOfJalaliCentury(date));
             return `${start - 10} - ${start + 100}`;
         },
         getItems: (date, { maxDate, minDate } = {}) => {
-            const startOfCentury = date
-                .startOf("year")
-                .set({ year: getStartOfCentury(date) });
-            return numberRange(
-                -GRID_MARGIN,
+            const startOfCentury = getStartOfJalaliCentury(date);
+            return numberRange(-GRID_MARGIN,
                 GRID_COUNT + GRID_MARGIN
             ).map((i) => {
-                const startOfDecade = startOfCentury.plus({
-                    year: i * 10,
-                });
+                const startOfDecade = addJalaliYears(
+                    startOfCentury,
+                    i * 10
+                );
                 const range = [
                     startOfDecade,
-                    startOfDecade.plus({
-                        year: 10,
-                        millisecond: -1,
+                    addJalaliYears(startOfDecade, 10).minus({
+                        millisecond: 1,
                     }),
                 ];
                 return toDateItem({
                     label: "year",
-                    isOutOfRange:
-                        i < 0 || i >= GRID_COUNT,
+                    isOutOfRange: i < 0 || i >= GRID_COUNT,
                     isValid: isInRange(range, [
                         minDate,
                         maxDate,
@@ -347,20 +377,7 @@ patch(DateTimePicker.prototype, {
         super.setup();
     },
     get titles() {
-        if (localization.code !== "fa_IR") {
-            return super.titles;
-        }
-        const { focusDate } = this.state;
-        if (!focusDate) return [];
-        const monthName = focusDate.toLocaleString({
-            month: "long",
-            calendar: "persian",
-        });
-        const year = focusDate.toLocaleString({
-            year: "numeric",
-            calendar: "persian",
-        });
-        return [`${monthName} ${year}`];
+        return super.titles;
     },
     get activePrecisionLevel() {
         if (localization.code !== "fa_IR") {
@@ -378,8 +395,7 @@ patch(DateTimePicker.prototype, {
         if (localization.code !== "fa_IR") {
             return super.adjustFocus(values, focusedDateIndex);
         }
-        if (
-            !this.shouldAdjustFocusDate &&
+        if (!this.shouldAdjustFocusDate &&
             this.state.focusDate
         ) {
             return;
@@ -393,26 +409,38 @@ patch(DateTimePicker.prototype, {
             focusedDateIndex === 1 &&
             values[0] &&
             values[1] &&
-            values[0].month !== values[1].month
+            !isSameJalaliMonth(values[0], values[1])
         ) {
-            dateToFocus = dateToFocus.minus({ month: 1 });
+            dateToFocus = addJalaliMonths(dateToFocus, -1);
         }
         this.shouldAdjustFocusDate = false;
-        // Jalali Logic: Focus on the start of the
-        // Jalali month to prevent UI jumps
-        const currentJalaliDay = parseInt(
-            dateToFocus.toLocaleString({
-                day: "numeric",
-                calendar: "persian",
-            }),
-            10
-        );
-        const startOfJalaliMonth = dateToFocus.minus({
-            days: currentJalaliDay - 1,
-        });
-        
         this.state.focusDate = this.clamp(
-            startOfJalaliMonth
+            getStartOfJalaliMonth(dateToFocus)
+        );
+    },
+    next(ev) {
+        if (localization.code !== "fa_IR") {
+            return super.next(ev);
+        }
+        ev.preventDefault();
+        this.state.focusDate = this.clamp(
+            shiftJalaliFocusDate(
+                this.state.focusDate,
+                this.state.precision,
+                1
+            )
+        );
+    },
+    previous(ev) {
+        if (localization.code !== "fa_IR") {
+            return super.previous(ev);
+        }
+        ev.preventDefault();
+        this.state.focusDate = this.clamp(
+            shiftJalaliFocusDate(
+                this.state.focusDate,
+                this.state.precision, -1
+            )
         );
     },
 });
