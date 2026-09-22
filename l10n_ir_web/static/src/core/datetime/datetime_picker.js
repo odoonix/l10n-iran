@@ -226,10 +226,10 @@ const JALALI_PRECISION_MAP = new Map()
                                         minDate,
                                         maxDate,
                                     ]) &&
-                                    isDateValid ? .(day),
+                                    isDateValid?.(day),
                                 label: "day",
                                 range,
-                                extraClass: dayCellClass ? .(day) ||
+                                extraClass: dayCellClass?.(day) ||
                                     "",
                             })
                         );
