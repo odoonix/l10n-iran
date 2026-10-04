@@ -8,7 +8,7 @@ import pytz
 from persiantools import digits
 
 from odoo import api
-from odoo.osv import expression
+from odoo.orm.domain import Domain
 from odoo.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT,
@@ -202,7 +202,7 @@ def _read_group_format_result(self, data, annotated_groupbys, groupby, domain):
         sections.append(d)
     sections.append(domain)
 
-    data["__domain"] = expression.AND(sections)
+    data["__domain"] = Domain.AND(sections)
     if len(groupby) - len(annotated_groupbys) >= 1:
         data["__context"] = {"group_by": groupby[len(annotated_groupbys) :]}
     del data["id"]
