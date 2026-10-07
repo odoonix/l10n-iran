@@ -8,7 +8,7 @@ import pytz
 from persiantools import digits
 
 from odoo import api
-from odoo.orm.domain import Domain
+from odoo.fields import Domain
 from odoo.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT,
